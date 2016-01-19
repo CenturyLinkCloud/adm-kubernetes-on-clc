@@ -28,7 +28,7 @@
   command: ssh-keygen -N '' -f {{ server_cert_store }}/id_rsa
   when: sshkeyfile.stat.exists == False
 
-- name: Create CLC servers in group {{ server_group }}, total servers count is {{ server_count }}
+- name: Create CLC servers in group {{ server_group }}, server count is {{ server_count }}
   clc_server:
     name: "{{ server_tag }}"
     location: "{{ datacenter }}"
@@ -44,7 +44,7 @@
     configuration_id: "{{ server_config_id }}"
   register: clc_servers
 
-- debug: var=clc_servers
+#- debug: var=clc_servers
 
 - name: Deploy ssh keys to servers
   clc_blueprint_package:
@@ -55,4 +55,11 @@
       SshKey: "{{ lookup('file', '{{ server_cert_store }}/id_rsa.pub') }}"
   with_flattened:
     - clc_servers.servers
-  when: clc_servers.servers is defined
+
+- name: Maek sure hosts directory exists
+  file:
+    name: "{{ ansible_hosts_directory }}"
+    state: directory
+
+- name: Write hosts file
+  template: src="hosts.j2" dest="{{ ansible_hosts_directory }}/hosts-{{ server_group }}-{{ server_tag }}"

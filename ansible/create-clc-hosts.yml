@@ -6,17 +6,13 @@
 
   vars:
     - server_parent_group: provisioning_test
+    - ansible_hosts_directory: "{{ server_parent_group }}.d"
     - server_group: etcd
     - datacenter: VA1
     - server_tag: etcd
-    - server_count: 1
-    - server_memory: 4
+    - server_count: 3
+    - server_memory: 2
     - server_cpu: 1
-
-  pre_tasks:
-    - debug: var=server_config_id
-    - fail: msg="alas"
-      when: False
 
   roles:
     - clc-provisioning
@@ -29,17 +25,13 @@
 
   vars:
     - server_parent_group: provisioning_test
+    - ansible_hosts_directory: "{{ server_parent_group }}.d"
     - server_group: master
     - datacenter: VA1
     - server_tag: master
     - server_count: 1
     - server_memory: 4
     - server_cpu: 1
-
-  pre_tasks:
-    - debug: var=server_config_id
-    - fail: msg="alas"
-      when: False
 
   roles:
     - clc-provisioning
@@ -52,6 +44,7 @@
 
   vars:
     - server_parent_group: provisioning_test
+    - ansible_hosts_directory: "{{ server_parent_group }}.d"
     - server_group: minion
     - datacenter: VA1
     - server_tag: minion
@@ -61,3 +54,17 @@
 
   roles:
     - clc-provisioning
+
+- name: Finalize the ansible inventory file
+  hosts: localhost
+  gather_facts: False
+  connection: local
+
+  vars:
+    - server_parent_group: provisioning_test
+    - ansible_hosts_directory: "{{ server_parent_group }}.d"
+
+  tasks:
+
+    - name: concatenate elements
+      assemble: src="{{ ansible_hosts_directory }}" dest="hosts-{{server_parent_group}}" delimiter="\n\n###"

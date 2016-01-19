@@ -1,45 +1,40 @@
-Role Name
-=========
+# Role Name
+A role to create a group of servers in a CenturyLink Cloud datacenter.  Creates a set of servers in a specified group.  Copied ssh-keys and writes an ansible hosts file for those servers so that they can be accessed directly for additional provisioning.  Runs only on localhost, making web service calls to the CenturyLink Cloud API.
 
-A role to create a group of servers in a CenturyLink Cloud datacenter.
+## Requirements
+The role uses the [clc-ansible-module](https://github.com/CenturyLinkCloud/clc-ansible-module)
 
-Requirements
-------------
-
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
-
-Role Variables
---------------
-
+## Role Variables
 Please define these variables:
-   * server_group: a group name for these servers
-   * datacenter: desired datacenter location, VA1, WA1, etc
-   * server_tag: 4-character tag used by CLC in generating the hostname
+- server_group: a group name for these servers
+- datacenter: desired datacenter location, VA1, WA1, etc
+- server_tag: 4-character tag used by CLC in generating the hostname
 
 Optionally:
-   * server_parent_group: defaults to "Default Group"   
+- server_parent_group: defaults to "Default Group"   
 
+## Example Playbook
 
-Dependencies
-------------
+```
+---
+- name: Get machine resources for web servers
+  hosts: localhost
+  gather_facts: False
+  connection: local
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+  vars:
+    - server_parent_group: provisioning_test
+    - ansible_hosts_directory: "{{ server_parent_group }}.d"
+    - server_group: test_servers
+    - datacenter: VA1
+    - server_tag: web
+    - server_count: 3
+    - server_memory: 2
+    - server_cpu: 1
 
-Example Playbook
-----------------
+  roles:
+    - clc-provisioning
+```
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
-
-License
--------
-
-BSD
-
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+## Author Information
+The Admiral group, CenturyLink Cloud
