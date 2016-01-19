@@ -1,13 +1,13 @@
 ---
 # tasks file for clc-provisioning
 
-- name: Ensure parent group exists
+- name: Ensure CenturyLink Cloud group {{ server_parent_group }} exists
   clc_group:
     name: "{{ server_parent_group }}"
     location: "{{ datacenter }}"
     state: present
 
-- name: Create a CenturyLink Cloud group for the servers
+- name: Create a CenturyLink Cloud group {{ server_group }} for the servers
   clc_group:
     name: "{{ server_group }}"
     parent: "{{ server_parent_group }}"
@@ -56,7 +56,7 @@
   with_flattened:
     - clc_servers.servers
 
-- name: Maek sure hosts directory exists
+- name: Make sure hosts directory exists
   file:
     name: "{{ ansible_hosts_directory }}"
     state: directory

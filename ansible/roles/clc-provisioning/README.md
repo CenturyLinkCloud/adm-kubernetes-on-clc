@@ -1,17 +1,19 @@
 # Role Name
-A role to create a group of servers in a CenturyLink Cloud datacenter.  Creates a set of servers in a specified group.  Copied ssh-keys and writes an ansible hosts file for those servers so that they can be accessed directly for additional provisioning.  Runs only on localhost, making web service calls to the CenturyLink Cloud API.
+A role to create a group of servers in a CenturyLink Cloud datacenter.  Creates a set of servers in a specified group.  Copies ssh-keys and writes an ansible hosts file for those servers so that they can be accessed directly for additional provisioning.  Runs only on localhost, making web service calls to the CenturyLink Cloud API.
 
 ## Requirements
 The role uses the [clc-ansible-module](https://github.com/CenturyLinkCloud/clc-ansible-module)
 
 ## Role Variables
 Please define these variables:
-- server_group: a group name for these servers
-- datacenter: desired datacenter location, VA1, WA1, etc
-- server_tag: 4-character tag used by CLC in generating the hostname
+- _server_group_: a group name for these servers
+- _datacenter_: desired datacenter location, VA1, WA1, etc
+- _server_tag_: 4-character tag used by CLC in generating the hostname
 
 Optionally:
-- server_parent_group: defaults to "Default Group"   
+- _server_parent_group_: defaults to "Default Group"   
+
+Other variables are found in _defaults/mail.yml_ and _vars/main.yml_
 
 ## Example Playbook
 
