@@ -1,0 +1,33 @@
+---
+## defaults file for clc-provisioning
+
+## in addition, user must specify:
+# server_group:   // a group name for these servers
+# datacenter:     // desired datacenter location, VA1, WA1, etc
+# server_tag:     // 4-character tag used by CLC in generating the hostname
+
+server_parent_group: "Default Group"
+
+## default to ubuntu
+server_vm_template: "ubuntu-14-64"
+server_physical_os: "ubuntu14_64Bit"
+
+## @see vars/main.yml
+# server_config_id: "{{ physical_server_4_core_conf_id }}"
+server_config_id: "{{ default_config_id }}"
+
+## directory in which to create or use ssh keys
+server_cert_store: "./certificates"
+
+## number of servers
+server_count: 1
+
+## options are
+# standard (vm)
+# bareMetal
+server_type: standard
+
+## options are
+# standard (vm)
+# bareMetal
+server_storage: standard

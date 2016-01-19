@@ -1,0 +1,36 @@
+---
+# tasks file for clc-provisioning
+
+- name: Create a CenturyLink Cloud group for the servers
+  clc_group:
+    name: "{{ server_group }}"
+    parent: "{{ server_parent_group }}"
+    location: "{{ datacenter }}"
+    state: present
+
+- name: Prepare local certificate store
+  file: path={{ server_cert_store }} state=directory mode=0755
+
+- name: Prepare local certificate file
+  stat: path="{{ server_cert_store }}/id_rsa"
+  register: sshkeyfile
+
+- name: Establish local ssh key
+  command: ssh-keygen -N '' -f {{ server_cert_store }}/id_rsa
+  when: sshkeyfile.stat.exists == False
+
+- name: Create CLC servers in group {{ server_group }}, total servers count is {{ server_count }}
+  clc_server:
+    name: "{{ server_tag }}"
+    location: "{{ datacenter }}"
+    template: "{{ server_vm_template }}"
+    os_type:  "{{ server_physical_os }}"
+    exact_count: "{{ server_count }}"
+    count_group: "{{ server_group }}"
+    group: "{{ server_group }}"
+    cpu: "{{ server_cpu }}"
+    memory: "{{ server_memory }}"
+    type: "{{ server_type }}"
+    storage_type: "{{ server_storage }}"
+    configuration_id: "{{ server_config_id }}"
+  register:

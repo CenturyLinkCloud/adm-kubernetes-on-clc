@@ -1,0 +1,2 @@
+clc-sdk==2.40
+clc-ansible-module

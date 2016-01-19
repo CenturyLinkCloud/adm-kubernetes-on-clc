@@ -1,0 +1,21 @@
+---
+- name: Get machine resources for etcd
+  hosts: localhost
+  gather_facts: False
+  connection: local
+
+  vars:
+    - server_group: etcd
+    - datacenter: VA1
+    - server_tag: etcd
+    - server_count: 1
+    - server_memory: 4
+    - server_cpu: 1
+
+  pre_tasks:
+    - debug: var=server_config_id
+    - fail: msg="alas"
+      when: False
+
+  roles:
+    - clc-provisioning
