@@ -1,0 +1,5 @@
+- name: Create flannel network configuration.
+  template: src=flannel-config.json.j2 dest=/tmp/flannel-config.json
+  
+- name: Deploy network confiuration to etcd
+  shell: etcdctl set /coreos.com/network/config < /tmp/flannel-config.json

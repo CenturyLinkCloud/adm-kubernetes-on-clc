@@ -1,0 +1,7 @@
+---
+- name: Install etcd
+  hosts: etcd
+  gather_facts: True
+
+  roles:
+    - etcd

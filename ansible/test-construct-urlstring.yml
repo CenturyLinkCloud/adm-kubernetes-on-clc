@@ -1,0 +1,21 @@
+---
+- name: facts
+  hosts: all
+  gather_facts: True
+
+- name: test
+  hosts: localhost
+  connection: local
+  gather_facts: False
+
+  tasks:
+
+    - debug: var=hostvars[item]["ansible_default_ipv4"]["address"]
+      with_items: groups['etcd']
+
+    - debug: msg="{% for host in groups['etcd'] %}  {{ hostvars[host]["ansible_default_ipv4"]["address"] }} {% endfor %}"
+
+    - set_fact:
+        a_string: "{% for host in groups['etcd'] %}http://{{ hostvars[host]['ansible_default_ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
+
+    - debug: var=a_string

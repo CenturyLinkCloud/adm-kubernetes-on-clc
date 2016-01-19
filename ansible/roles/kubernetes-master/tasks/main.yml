@@ -1,0 +1,47 @@
+- name: Add kube-apiserver service configuration.
+  template: src=kube-apiserver.conf.j2 dest=/etc/init/kube-apiserver.conf
+
+- name: Get make-ca-cert/easy-rsa script
+  get_url:
+    dest: /tmp/make-ca-cert.sh
+    url: https://raw.githubusercontent.com/kubernetes/kubernetes/master/cluster/saltbase/salt/generate-cert/make-ca-cert.sh
+
+- name: Change file permissions on make-ca-cert
+  file:
+    path: /tmp/make-ca-cert.sh
+    mode: 0700
+
+- name: Run make-ca-cert
+  shell: CERT_GROUP=users /tmp/make-ca-cert.sh {{ master_ip }} IP:{{ master_ip }},IP:{{ cluster_dns_service_vip }},DNS:kubernetes,DNS:kubernetes.default,DNS:kubernetes.default.svc,DNS:kubernetes.default.svc.cluster.{{ cluster_dns_domain }}
+  args:
+    creates: /srv/kubernetes/ca.crt
+
+- name: Create a placeholder token file
+  shell: touch /srv/kubernetes/known_tokens.csv
+
+- name: Enable kube-apiserver service.
+  service: name=kube-apiserver enabled=yes
+
+- name: Start kube-apiserver service.
+  service: name=kube-apiserver state=restarted
+
+- name: Add kube-controller-manager service configuration.
+  template: src=kube-controller-manager.conf.j2 dest=/etc/init/kube-controller-manager.conf
+
+- name: Enable kube-controller-manager service.
+  service: name=kube-controller-manager enabled=yes
+
+- name: Start kube-controller-manager service.
+  service: name=kube-controller-manager state=restarted
+
+- name: Add kube-scheduler service configuration.
+  template: src=kube-scheduler.conf.j2 dest=/etc/init/kube-scheduler.conf
+
+- name: Enable kube-scheduler service.
+  service: name=kube-scheduler enabled=yes
+
+- name: Start kube-scheduler service.
+  service: name=kube-scheduler state=restarted
+
+- name: Install httplib2.
+  apt: name=python-httplib2 state=present

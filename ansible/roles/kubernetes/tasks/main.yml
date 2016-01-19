@@ -1,0 +1,18 @@
+- name: Download kubernetes release.
+  get_url: url={{ kubernetes_url }} dest=/tmp/
+  
+- name: Unarchive kubernetes release.
+  unarchive: src=/tmp/{{ kubernetes_version }}.tar.gz dest=/var/lib/ copy=false group=root owner=root mode=755
+
+- name: Unarchive kubernetes release binaries.
+  unarchive: src=/var/lib/kubernetes/server/kubernetes-server-linux-amd64.tar.gz dest=/var/lib/kubernetes/server copy=false group=root owner=root mode=755
+  
+- name: Create symbolic links to kubernetes binaries.
+  file: src=/var/lib/kubernetes/server/kubernetes/server/bin/{{ item }} dest=/usr/bin/{{ item }} owner=root group=root state=link
+  with_items:
+    - kube-apiserver
+    - kube-controller-manager
+    - kube-scheduler
+    - kubelet
+    - kube-proxy
+    - kubectl
