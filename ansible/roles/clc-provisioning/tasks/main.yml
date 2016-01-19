@@ -1,12 +1,21 @@
 ---
 # tasks file for clc-provisioning
 
+- name: Ensure parent group exists
+  clc_group:
+    name: "{{ server_parent_group }}"
+    location: "{{ datacenter }}"
+    state: present
+
 - name: Create a CenturyLink Cloud group for the servers
   clc_group:
     name: "{{ server_group }}"
     parent: "{{ server_parent_group }}"
     location: "{{ datacenter }}"
     state: present
+
+- name: Do something regarding the network for the servers
+  debug: msg="TODO, for now, we'll use defaults"
 
 - name: Prepare local certificate store
   file: path={{ server_cert_store }} state=directory mode=0755
@@ -33,4 +42,17 @@
     type: "{{ server_type }}"
     storage_type: "{{ server_storage }}"
     configuration_id: "{{ server_config_id }}"
-  register:
+  register: clc_servers
+
+- debug: var=clc_servers
+
+- name: Deploy ssh keys to servers
+  clc_blueprint_package:
+    server_ids: "{{ item.name }}"
+    package_id: "{{ ssh_key_package_id }}"
+    package_params:
+      User: "root"
+      SshKey: "{{ lookup('file', '{{ server_cert_store }}/id_rsa.pub') }}"
+  with_flattened:
+    - clc_servers.servers
+  when: clc_servers.servers is defined
