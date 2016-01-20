@@ -11,7 +11,7 @@ Please define these variables:
 - _server_tag_: 4-character tag used by CLC in generating the hostname
 
 Optionally:
-- _server_parent_group_: defaults to "Default Group"   
+- _clc_cluster_name_: defaults to "clc-cluster"   
 
 Other variables are found in _defaults/mail.yml_ and _vars/main.yml_
 
@@ -25,11 +25,10 @@ Other variables are found in _defaults/mail.yml_ and _vars/main.yml_
   connection: local
 
   vars:
-    - server_parent_group: provisioning_test
-    - ansible_hosts_directory: "{{ server_parent_group }}.d"
-    - server_group: test_servers
+    - clc_cluster_name: provisioning_test
+    - ansible_hosts_directory: "{{ clc_cluster_name }}.d"
+    - server_group: web
     - datacenter: VA1
-    - server_tag: web
     - server_count: 3
     - server_memory: 2
     - server_cpu: 1

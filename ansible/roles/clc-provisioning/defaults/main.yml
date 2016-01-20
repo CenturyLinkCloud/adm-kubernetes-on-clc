@@ -2,11 +2,10 @@
 ## defaults file for clc-provisioning
 
 ## in addition, user must specify:
-# server_group:   // a group name for these servers
+# server_group:   // a group name for these servers, also used by CLC in generating the hostname
 # datacenter:     // desired datacenter location, VA1, WA1, etc
-# server_tag:     // 4-character tag used by CLC in generating the hostname
 
-server_parent_group: "Default Group"
+clc_cluster_name: "clc-cluster"
 
 ## default to ubuntu
 server_vm_template: "ubuntu-14-64"

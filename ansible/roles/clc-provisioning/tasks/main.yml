@@ -1,16 +1,16 @@
 ---
 # tasks file for clc-provisioning
 
-- name: Ensure CenturyLink Cloud group {{ server_parent_group }} exists
+- name: Ensure CenturyLink Cloud group {{ clc_cluster_name }} exists
   clc_group:
-    name: "{{ server_parent_group }}"
+    name: "{{ clc_cluster_name }}"
     location: "{{ datacenter }}"
     state: present
 
-- name: Create a CenturyLink Cloud group {{ server_group }} for the servers
+- name: Create a CenturyLink Cloud group {{ clc_cluster_name }}.{{ server_group }} for the servers
   clc_group:
-    name: "{{ server_group }}"
-    parent: "{{ server_parent_group }}"
+    name: "{{ clc_cluster_name }}.{{ server_group }}"
+    parent: "{{ clc_cluster_name }}"
     location: "{{ datacenter }}"
     state: present
 
@@ -28,15 +28,15 @@
   command: ssh-keygen -N '' -f {{ server_cert_store }}/id_rsa
   when: sshkeyfile.stat.exists == False
 
-- name: Create CLC servers in group {{ server_group }}, server count is {{ server_count }}
+- name: Create CLC servers in group {{ clc_cluster_name }}.{{ server_group }}, server count is {{ server_count }}
   clc_server:
-    name: "{{ server_tag }}"
+    name: "{{ server_group }}"
     location: "{{ datacenter }}"
     template: "{{ server_vm_template }}"
     os_type:  "{{ server_physical_os }}"
     exact_count: "{{ server_count }}"
-    count_group: "{{ server_group }}"
-    group: "{{ server_group }}"
+    count_group: "{{ clc_cluster_name }}.{{ server_group }}"
+    group: "{{ clc_cluster_name }}.{{ server_group }}"
     cpu: "{{ server_cpu }}"
     memory: "{{ server_memory }}"
     type: "{{ server_type }}"
@@ -62,4 +62,4 @@
     state: directory
 
 - name: Write hosts file
-  template: src="hosts.j2" dest="{{ ansible_hosts_directory }}/hosts-{{ server_group }}-{{ server_tag }}"
+  template: src="hosts.j2" dest="{{ ansible_hosts_directory }}/hosts-{{ clc_cluster_name }}-{{ server_group }}"
