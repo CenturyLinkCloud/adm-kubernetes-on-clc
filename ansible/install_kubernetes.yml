@@ -1,0 +1,83 @@
+
+---
+- name: Collect Facts
+  hosts: all
+  gather_facts: True
+
+  tasks:
+    - name: Set etcd url
+      set_fact:
+        etcd_endpoint: "{% for host in groups['etcd'] %}http://{{ hostvars[host]['ansible_default_ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
+
+
+- name: Kubernetes Master
+  hosts: master
+  gather_facts: True
+  vars_files:
+    - vars.yml
+  vars:
+    - apiserver_endpoint: http://{{ ansible_default_ipv4.address }}:8080
+  pre_tasks:
+    - name: set master ip address
+      set_fact: master_ip={{ ansible_default_ipv4.address }}
+  roles:
+    - resolv
+    - etcd
+    - flannel
+    - flannel-network
+    - flannel-client
+    - kubernetes
+    - kubernetes-node
+    - kubernetes-master
+
+
+- hosts: Kubernetes minion
+  vars_files:
+    - vars.yml
+  pre_tasks:
+    - set_fact: apiserver_endpoint=http://{{ hostvars[ item ].ansible_default_ipv4.address }}:8080
+      with_items: groups['master'][0]
+
+  roles:
+    - resolv
+    - etcd
+    - flannel
+    - flannel-client
+    - docker
+    - docker-flannel
+    - kubernetes
+    - kubernetes-node
+
+- name: Update resolv.conf for skydns service
+  hosts:
+    - master
+    - minion
+  vars_files:
+    - vars.yml
+  vars:
+    resolv_domain: "{{ cluster_dns_domain }}"
+    resolv_search:
+      - "{{ cluster_dns_domain }}"
+      - "svc.{{ cluster_dns_domain }}"
+      - "default.svc.{{ cluster_dns_domain }}"
+    resolv_nameserver:
+      - "{{ cluster_dns_service_vip }}"
+      - "8.8.8.8"
+      - "8.8.4.4"
+    resolv_sortlist: []
+    resolv_options:
+      - ndots:5
+  roles:
+    - resolv
+
+- name: install DNS
+  hosts: master
+  gather_facts: True
+  vars_files:
+    - vars.yml
+  vars:
+    - kubernetes_application:
+       - skydns
+    - apiserver_endpoint: http://{{ ansible_default_ipv4.address }}:8080
+  roles:
+    - kubernetes-application

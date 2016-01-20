@@ -1,0 +1,13 @@
+
+- hosts: "{{ cluster_name }}-master"
+  gather_facts: True
+  vars_files:
+    - vars.yml
+  vars:
+    - etcd_endpoint: http://{{ ansible_default_ipv4.address }}:4001
+    - apiserver_endpoint: http://{{ ansible_default_ipv4.address }}:8080
+  pre_tasks:
+    - name: set master ip address
+      set_fact: ip_address={{ ansible_default_ipv4.address }}
+  roles:
+    - kubernetes-application

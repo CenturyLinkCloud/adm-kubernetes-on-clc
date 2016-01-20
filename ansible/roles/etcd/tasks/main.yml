@@ -16,20 +16,24 @@
     - etcd
     - etcdctl
 
-- name: set config
-  template: src=etcd.conf.j2 dest=/etc/default/etcd
+- block:
 
-- name: install Upstart script
-  copy: src=etcd.conf  dest=/etc/init/etcd.conf
+  - name: set config
+    template: src=etcd.conf.j2 dest=/etc/default/etcd
 
-- name: create /var/etcd/
-  file: path=/var/etcd state=directory
+  - name: install Upstart script
+    copy: src=etcd.conf  dest=/etc/init/etcd.conf
 
-- name: clear datadir
-  file: path="{{ etcd_data_dir }}" state=absent
+  - name: create /var/etcd/
+    file: path=/var/etcd state=directory
 
-- name: restore datadir
-  file: path="{{ etcd_data_dir }}" state=directory
+  - name: clear datadir
+    file: path="{{ etcd_data_dir }}" state=absent
 
-- name: restart service
-  service: name=etcd state=restarted
+  - name: restore datadir
+    file: path="{{ etcd_data_dir }}" state=directory
+
+  - name: restart service
+    service: name=etcd state=restarted
+
+  when: "{{ etcd_install_and_run_service }}"
