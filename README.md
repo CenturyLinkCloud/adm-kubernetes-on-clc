@@ -4,7 +4,7 @@
 
 #### Requirements
 
-   * local installation of ansible.  If on OSX, try installing with `brew install ansible`
+   * local installation of ansible *2.0*.  If on OSX, try installing with `brew install ansible`
    * python and pip
    * A CenturyLink Cloud account with rights to create new hosts
 
