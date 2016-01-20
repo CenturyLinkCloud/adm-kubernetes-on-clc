@@ -48,6 +48,19 @@
     - kubernetes
     - kubernetes-node
 
+- name: install DNS and UI applications
+  hosts: master[0]
+  gather_facts: True
+  vars_files:
+    - vars.yml
+  vars:
+    - kubernetes_application:
+       - skydns
+       - kube-ui
+    - apiserver_endpoint: http://{{ ansible_default_ipv4.address }}:8080
+  roles:
+    - kubernetes-application
+
 - name: Update resolv.conf for skydns service
   hosts:
     - master
@@ -69,15 +82,3 @@
       - ndots:5
   roles:
     - resolv
-
-- name: install DNS
-  hosts: master
-  gather_facts: True
-  vars_files:
-    - vars.yml
-  vars:
-    - kubernetes_application:
-       - skydns
-    - apiserver_endpoint: http://{{ ansible_default_ipv4.address }}:8080
-  roles:
-    - kubernetes-application

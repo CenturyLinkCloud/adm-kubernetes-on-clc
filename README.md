@@ -9,9 +9,9 @@
 Getting ready:
 
 Clone this repository and cd into it.
-1. `sudo pip install -r requirements.txt`
-2. `cd ansible`
-3. Create the credentials file from the template, and `source credentials.sh`
+- `sudo pip install -r requirements.txt`
+- `cd ansible`
+- Create the credentials file from the template, and `source credentials.sh`
 
 ### Creating virtual hosts
 - Edit the playbook and variables as needed
@@ -30,7 +30,7 @@ Within each play, the `clc-provisioning` role writes a fragment of an inventory 
 
 ## Provisioning the cluster
 ### Installing etcd
-`ansible-playbook -i hosts-${CLC_CLUSTER_NAME} install-etcd.yml`
+`ansible-playbook -i hosts-${CLC_CLUSTER_NAME} install_etcd.yml`
 
 Celery quandong swiss chard chicory earthnut pea potato. Salsify taro catsear garlic gram celery bitterleaf wattle seed collard greens nori. Grape wattle seed kombu beetroot horseradish carrot squash brussels sprout chard.
 
