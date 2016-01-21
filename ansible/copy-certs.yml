@@ -1,0 +1,50 @@
+---
+- hosts: master, minion
+  gather_facts: True
+
+- hosts: master[0]
+
+  tasks:
+
+    - name: slurp ca cert
+      slurp: src="/srv/kubernetes/ca.crt"
+      register: ca_cert
+      run_once: true
+
+    - name: slurp kubecfg key
+      slurp: src="/srv/kubernetes/kubecfg.key"
+      register: kubecfg_key
+      run_once: true
+
+    - name: slurp kubecfg cert
+      slurp: src="/srv/kubernetes/kubecfg.crt"
+      register: kubecfg_crt
+      run_once: true
+
+- hosts:
+  - minion
+  - master
+
+  tasks:
+
+    - set_fact: ca_cert_b64="{{ hostvars[ groups['master'][0]][ 'ca_cert' ]['content'] }}"
+    - set_fact: kubecfg_cert_b64="{{ hostvars[ groups['master'][0]][ 'kubecfg_crt' ]['content'] }}"
+    - set_fact: kubecfg_key_b64="{{ hostvars[ groups['master'][0]][ 'kubecfg_key' ]['content'] }}"
+
+    - debug: var=ca_cert_b64
+
+    - file:
+        path: /var/lib/kubelet
+        state: directory
+
+    - template:
+        src: roles/kubernetes-node/templates/kubelet-kubeconfig.j2
+        dest: /var/lib/kubelet/kubeconfig
+
+    - service:
+        name: kubelet
+        state: restarted
+
+    - service:
+        name: kube-proxy
+        state: restarted

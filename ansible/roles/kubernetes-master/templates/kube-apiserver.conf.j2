@@ -4,18 +4,19 @@ author "mark ramach"
 script
 
 	KUBE_APISERVER_OPTS="\
-	   --address=0.0.0.0 \
-		 --advertise-address={{ ansible_default_ipv4.address }} \
-		 --service-cluster-ip-range={{ cluster_service_vip_range }} \
-		 --etcd-servers={{ etcd_endpoint }}\
-		 --client-ca-file=/srv/kubernetes/ca.crt\
-	   --insecure-bind-address=0.0.0.0\
-     --insecure-port=8080\
-	   --client-ca-file=/srv/kubernetes/ca.crt\
-	   --tls-cert-file=/srv/kubernetes/server.cert\
-     --tls-private-key-file=/srv/kubernetes/server.key\
-     --token-auth-file=/srv/kubernetes/known_tokens.csv\
-     --admission_control=NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota\
+    --address=0.0.0.0 \
+    --admission_control=NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota\
+    --advertise-address={{ ansible_default_ipv4.address }} \
+    --client-ca-file=/srv/kubernetes/ca.crt\
+    --client-ca-file=/srv/kubernetes/ca.crt\
+    --etcd-servers={{ etcd_endpoint }}\
+    --insecure-bind-address=0.0.0.0\
+    --insecure-port=8080\
+    --service-account-key-file=/srv/kubernetes/server.key \
+    --service-cluster-ip-range={{ cluster_service_vip_range }} \
+    --tls-cert-file=/srv/kubernetes/server.cert\
+    --tls-private-key-file=/srv/kubernetes/server.key\
+    --token-auth-file=/srv/kubernetes/known_tokens.csv\
 		 "
 
 	exec kube-apiserver $KUBE_APISERVER_OPTS > /var/log/kube-apiserver.log
