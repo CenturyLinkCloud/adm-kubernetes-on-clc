@@ -45,7 +45,7 @@
     - server_memory: 4
     - server_cpu: 2
     - skip_minion: False
-    - server_type: "{{ minion_type }}"
+#    - server_type: "{{ minion_type }}"
 
 #  vars:
 #    - server_type: "{{ minion_type }}"
