@@ -45,13 +45,13 @@
     - server_memory: 4
     - server_cpu: 2
     - skip_minion: False
-#    - server_type: "{{ minion_type }}"
+    - server_type: "{{ minion_type }}"
 
 #  vars:
 #    - server_type: "{{ minion_type }}"
 #      when: minion_type is defined
   roles: 
-    - { role: clc-provisioning, when: skip_minion == 'False' }    
+    - { role: clc-provisioning, when: skip_minion == False }    
 
 
 - name: Finalize the ansible inventory file
