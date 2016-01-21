@@ -29,10 +29,8 @@
     - server_memory: 4
     - server_cpu: 1
     - skip_master: False
-  roles:
-    - clc-provisioning
-  when: skip_master == False
-
+  roles: 
+    - { role: clc-provisioning, when: skip_master == 'False' }
 
 - name: Get machine resources for k8s minion
   hosts: localhost
@@ -46,11 +44,12 @@
     - server_count: 2
     - server_memory: 4
     - server_cpu: 2
+    - skip_minion: False
   vars:
     - server_type: "{{ minion_type }}"
       when: minion_type is defined
-  roles:
-    - clc-provisioning
+  roles: 
+    - { role: clc-provisioning, when: skip_minion == 'False' }    
 
 
 - name: Finalize the ansible inventory file
