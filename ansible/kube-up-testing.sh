@@ -91,47 +91,10 @@ echo "Extra Args   : ${extra_args}"
 
 #### Part1a 
 echo "Part1a -  Building out the infrastructure on CLC"
-{ ansible-playbook create-master-hosts.yml -e "$extra_args"; } &
+#{ ansible-playbook create-master-hosts.yml -e "$extra_args"; } &
 if [ -z ${etcd_seperate_cluster+x} ]; then 
-    { ansible-playbook create-etcd-hosts.yml -e "$extra_args"; } &
+    echo "HERE I AM"
+    #{ ansible-playbook create-etcd-hosts.yml -e "$extra_args"; } &
 fi
-{ ansible-playbook create-minion-hosts.yml -e "$extra_args"; } &
+#{ ansible-playbook create-minion-hosts.yml -e "$extra_args"; } &
 wait
-
-#### Part1b 
-echo "Part1b -  create hosts file"
-{ ansible-playbook create-hosts-file.yml -e "$extra_args"; } &
-wait
-
-#### Part2 
-echo "Part2 - Setting up etcd"
-#install etcd on master or on seperate cluster of vms
-if [ -z ${etcd_seperate_cluster+x} ]; then 
-    { ansible-playbook -i hosts-$clc_cluster_name install_etcd_on_master.yml; } &
-else
-    { ansible-playbook -i hosts-$clc_cluster_name install_etcd.yml; } &      
-fi
-wait
-
-
-#### Part3 
-echo "Part3 - Setting up kubernetes"
-{ ansible-playbook -i hosts-$clc_cluster_name install_kubernetes.yml; } &
-wait
-
-
-#### Part X - Running test phase and displaying cluster info
-#echo "Starting testing Phase"
-#{ ansible-playbook -i /usr/local/bin/clc_inv.py kubernetes-describe-cluster.yml -e "$extra_args"; } &
-#wait
-
-
-
-echo "      Output of 'kubectl cluster-info' on master server"
-echo ""
-#cat /tmp/$cluster_name
-echo ""
-
-echo "All done. Try out your k8 cluster today! -ck"
-echo "> kubectl get nodes"
-echo "> kubectl cluster-info"
