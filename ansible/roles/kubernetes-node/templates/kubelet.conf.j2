@@ -5,7 +5,6 @@ script
 
 	KUBELET_OPTS="\
 	  --address=0.0.0.0 --api-servers={{ apiserver_endpoint }} \
-	  --hostname-override={{ ansible_eth0.ipv4.address }} \
 	  --hostname-override={{ ansible_ssh_host }} \      
       --cluster-dns={{ cluster_dns_service_vip }} \
       --cluster-domain={{ cluster_dns_domain }} \
