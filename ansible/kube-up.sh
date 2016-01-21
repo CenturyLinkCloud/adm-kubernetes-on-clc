@@ -50,6 +50,12 @@ case $i in
     shift # past argument=value
     ;;        
     
+    #etcd_seperate_cluster
+    -etc=*|--etcd_seperate_cluster=*)
+    etcd_seperate_cluster="${i#*=}"
+    extra_args="$extra_args etcd_seperate_cluster=$etcd_seperate_cluster"    
+    shift # past argument=value
+    ;; 
 
     -phyid=*|--server_conf_id=*)
     server_conf_id="${i#*=}"
@@ -85,7 +91,9 @@ echo ""
 #### Part1a 
 echo "Part1a -  Building out the infrastructure on CLC"
 { ansible-playbook create-master-hosts.yml -e "$extra_args"; } &
-{ ansible-playbook create-etcd-hosts.yml -e "$extra_args"; } &
+if [ -z ${etcd_seperate_cluster+x} ]; then 
+    { ansible-playbook create-etcd-hosts.yml -e "$extra_args"; } &
+fi
 { ansible-playbook create-minion-hosts.yml -e "$extra_args"; } &
 wait
 
@@ -96,8 +104,14 @@ wait
 
 #### Part2 
 echo "Part2 - Setting up etcd"
-{ ansible-playbook -i hosts-$clc_cluster_name install_etcd.yml; } &
+#install etcd on master or on seperate cluster of vms
+if [ -z ${etcd_seperate_cluster+x} ]; then 
+    { ansible-playbook -i hosts-$clc_cluster_name install_etcd_on_master.yml; } &
+else
+    { ansible-playbook -i hosts-$clc_cluster_name install_etcd.yml; } &      
+fi
 wait
+
 
 #### Part3 
 echo "Part3 - Setting up kubernetes"
