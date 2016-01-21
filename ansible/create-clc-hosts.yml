@@ -46,6 +46,7 @@
     - server_memory: 4
     - server_cpu: 2
     - skip_minion: False
+      when: minion_type is undefined
   vars:
     - clc_cluster_name: k8s
     - ansible_hosts_directory: "{{ clc_cluster_name }}.d"
@@ -57,6 +58,7 @@
     - skip_minion: False
     - server_type: "{{ minion_type }}"
       when: minion_type is defined
+      
   roles: 
     - { role: clc-provisioning, when: skip_minion == False }    
 
