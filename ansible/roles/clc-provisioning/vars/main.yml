@@ -10,4 +10,4 @@ ssh_key_package_id: "77abb844-579d-478d-3955-c69ab4a7ba1a"
 physical_server_20_core_conf_id: "8057e3629403e92d6693352ad17a807dc8970aef"
 physical_server_12_core_conf_id: "f24b18ba2ce23657657444601649c7b8b7f9b60c"
 physical_server_4_core_conf_id: "529e2592a3e640a7c2617b5e8bc8feaed94eac22"
-default_config_id: {{ physical_server_4_core_conf_id }}
+default_config_id: "{{ physical_server_4_core_conf_id }}"
