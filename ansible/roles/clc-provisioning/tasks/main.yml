@@ -43,7 +43,8 @@
     storage_type: "{{ server_storage }}"
     configuration_id: "{{ server_config_id }}"
   register: clc_servers
-
+  async: "{{ async_time }}"
+  poll: "{{ async_poll }}"
 #- debug: var=clc_servers
 
 - name: Deploy ssh keys to servers
