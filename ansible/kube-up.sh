@@ -77,31 +77,37 @@ done
 echo "Creating Kubernetes Cluster on CenturyLink Cloud"
 echo ""
 
-echo "cluster_name  = ${cluster_name}"
-echo "minion_count     = ${minion_count}"
-echo "server_type    = ${server_type}"
-echo "etcd_seperate_cluster    = ${etcd_seperate_cluster}"
+#echo "cluster_name  = ${cluster_name}"
+#echo "minion_count     = ${minion_count}"
+#echo "server_type    = ${server_type}"
+#echo "etcd_seperate_cluster    = ${etcd_seperate_cluster}"
 
-echo "Extra Args   : ${extra_args}"
+#echo "Extra Args   : ${extra_args}"
 #echo "ansible-playbook -i /usr/local/bin/clc_inv.py kubernetes-describe-cluster.yml $extra_args"
 
 
 
-    
+
+
 
 #### Part1a 
 echo "Part1a -  Building out the infrastructure on CLC"
 { ansible-playbook create-master-hosts.yml -e "$extra_args"; } &
+{ ansible-playbook create-minion-hosts.yml -e "$extra_args"; } &
 if [ -z ${etcd_seperate_cluster+x} ]; then 
+    echo "ETCD will be installed on master server"
+else
+    echo "ETCD will be installed on 3 seperate VMs not part of k8s cluster"
     { ansible-playbook create-etcd-hosts.yml -e "$extra_args"; } &
 fi
-{ ansible-playbook create-minion-hosts.yml -e "$extra_args"; } &
 wait
 
 #### Part1b 
 echo "Part1b -  create hosts file"
 { ansible-playbook create-hosts-file.yml -e "$extra_args"; } &
 wait
+
+
 
 #### Part2 
 echo "Part2 - Setting up etcd"
