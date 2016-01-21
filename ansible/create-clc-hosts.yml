@@ -3,7 +3,6 @@
   hosts: localhost
   gather_facts: False
   connection: local
-
   vars:
     - clc_cluster_name: k8s
     - ansible_hosts_directory: "{{ clc_cluster_name }}.d"
@@ -12,16 +11,17 @@
     - server_count: 3
     - server_memory: 2
     - server_cpu: 1
-
-  roles:
-    - clc-provisioning
+    - skip_etcd: False
+    - async_time: 1200
+    - async_poll: 5
+  roles: 
+    - { role: clc-provisioning, when: skip_etcd == False }
 
 
 - name: Get machine resources for k8s master
   hosts: localhost
   gather_facts: False
   connection: local
-
   vars:
     - clc_cluster_name: k8s
     - ansible_hosts_directory: "{{ clc_cluster_name }}.d"
@@ -30,16 +30,17 @@
     - server_count: 1
     - server_memory: 4
     - server_cpu: 1
-
-  roles:
-    - clc-provisioning
-
+    - skip_master: False
+    - async_time: 1200
+    - async_poll: 5
+  roles: 
+    - { role: clc-provisioning, when: skip_master == False }
 
 - name: Get machine resources for k8s minion
   hosts: localhost
   gather_facts: False
   connection: local
-
+  # Both vars declrations need to be the same. I have this when hack in place to override sertype for minions only. 
   vars:
     - clc_cluster_name: k8s
     - ansible_hosts_directory: "{{ clc_cluster_name }}.d"
@@ -48,9 +49,25 @@
     - server_count: 2
     - server_memory: 4
     - server_cpu: 2
+    - skip_minion: False
+    - async_time: 1200
+    - async_poll: 5    
+  
+  pre_tasks:
+    - name: Check for Minion_type
+      set_fact:
+        server_type: "{{ minion_type }}"
+      when: minion_type is defined
 
-  roles:
-    - clc-provisioning
+    - name: Set Async time
+      set_fact:
+        async_time: 3600
+        async_poll: 10 
+      when: server_type == "bateMetal"
+
+  roles: 
+    - { role: clc-provisioning, when: skip_minion == False }    
+
 
 - name: Finalize the ansible inventory file
   hosts: localhost
