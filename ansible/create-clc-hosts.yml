@@ -59,9 +59,9 @@
     # - { server_type: "{{ minion_type }}", when: minion_type }
   pretasks:
     - name: Check for Minion_type
-    set_fact:
-      server_type: "{{ minion_type }}"
-    when: minion_type is defined
+      set_fact:
+        server_type: "{{ minion_type }}"
+      when: minion_type is defined
     
   roles: 
     - { role: clc-provisioning, when: skip_minion == False }    
