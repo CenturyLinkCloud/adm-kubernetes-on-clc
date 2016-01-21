@@ -10,7 +10,7 @@
     - datacenter: VA1
     - server_count: 1
     - server_memory: 4
-    - server_cpu: 1
+    - server_cpu: 2
     - skip_master: False
     - async_time: 1200
     - async_poll: 5

@@ -22,8 +22,21 @@
       set_fact:
         server_type: "{{ minion_type }}"
       when: minion_type is defined
-
-    - name: Set Async time
+    - name: Check for Minion_count
+      set_fact:
+        server_count: "{{ minion_count }}"
+      when: minion_count is defined
+    - name: Check for vm_cpu
+      set_fact:
+        server_cpu: "{{ vm_cpu }}"
+      when: vm_cpu is defined
+    - name: Check for vm_memory
+      set_fact:
+        server_memory: "{{ vm_memory }}"
+      when: vm_memory is defined
+      
+      
+    - name: Set Async time differently if type = bareMetal
       set_fact:
         async_time: 3600
         async_poll: 10 

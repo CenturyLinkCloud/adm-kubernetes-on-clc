@@ -29,24 +29,16 @@ case $i in
     extra_args="$extra_args minion_type=$minion_type"    
     shift # past argument=value
     ;;
-    
-    
-    
+    -d=*|--datacenter=*)
+    datacenter="${i#*=}"
+    extra_args="$extra_args datacenter=$datacenter"    
+    shift # past argument=value
+    ;;        
     -m=*|--minion_count=*)
     minion_count="${i#*=}"
     extra_args="$extra_args minion_count=$minion_count"
     shift # past argument=value
     ;;
-    -d=*|--datacenter=*)
-    datacenter="${i#*=}"
-    extra_args="$extra_args datacenter=$datacenter"    
-    shift # past argument=value
-    ;;    
-    -phyid=*|--physical_server_conf_id=*)
-    physical_server_conf_id="${i#*=}"
-    extra_args="$extra_args physical_server_conf_id=$physical_server_conf_id"    
-    shift # past argument=value
-    ;;        
     -mem=*|--vm_memory=*)
     vm_memory="${i#*=}"
     extra_args="$extra_args vm_memory=$vm_memory"    
@@ -56,7 +48,15 @@ case $i in
     vm_cpu="${i#*=}"
     extra_args="$extra_args vm_cpu=$vm_cpu"    
     shift # past argument=value
-    ;;            
+    ;;        
+    
+
+    -phyid=*|--server_conf_id=*)
+    server_conf_id="${i#*=}"
+    extra_args="$extra_args server_conf_id=$server_conf_id"    
+    shift # past argument=value
+    ;;        
+        
     --default)
     DEFAULT=YES
     shift # past argument with no value
@@ -80,7 +80,7 @@ echo ""
 
 
 
-
+    
 
 #### Part1a 
 echo "Part1a -  Building out the infrastructure on CLC"
