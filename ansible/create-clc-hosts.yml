@@ -36,6 +36,7 @@
   hosts: localhost
   gather_facts: False
   connection: local
+  # Both vars declrations need to be the same. I have this when hack in place to override sertype for minions only. 
   vars:
     - clc_cluster_name: k8s
     - ansible_hosts_directory: "{{ clc_cluster_name }}.d"
@@ -45,8 +46,15 @@
     - server_memory: 4
     - server_cpu: 2
     - skip_minion: False
-#    - server_type: "{{ minion_type }}"
   vars:
+    - clc_cluster_name: k8s
+    - ansible_hosts_directory: "{{ clc_cluster_name }}.d"
+    - server_group: minion
+    - datacenter: VA1
+    - server_count: 2
+    - server_memory: 4
+    - server_cpu: 2
+    - skip_minion: False
     - server_type: "{{ minion_type }}"
       when: minion_type is defined
   roles: 
