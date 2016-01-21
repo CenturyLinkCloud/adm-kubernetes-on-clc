@@ -3,7 +3,6 @@
   hosts: localhost
   gather_facts: False
   connection: local
-
   vars:
     - clc_cluster_name: k8s
     - ansible_hosts_directory: "{{ clc_cluster_name }}.d"
@@ -15,7 +14,7 @@
     - skip_etcd: False
   roles:
     - clc-provisioning
-  when: skip_etcd == False
+    when: skip_etcd == False
 
 
 - name: Get machine resources for k8s master
@@ -50,7 +49,7 @@
     - server_cpu: 2
   vars:
     - server_type: "{{ minion_type }}"
-      when: minion_type.exists == True
+      when: minion_type is defined
   roles:
     - clc-provisioning
 
