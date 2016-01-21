@@ -12,8 +12,8 @@
     - server_memory: 2
     - server_cpu: 1
     - skip_etcd: False
-  roles: clc-provisioning
-    when: skip_etcd == False
+  roles: 
+    - { role: clc-provisioning, when: skip_etcd == 'False' }
 
 
 - name: Get machine resources for k8s master
