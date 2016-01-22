@@ -24,7 +24,7 @@
 
 - name: Create CLC servers in group {{ clc_cluster_name }}.{{ server_group }}, server count is {{ server_count }}
   clc_server:
-    name: "k8s{{ server_group }}"
+    name: "{{ server_group }}"
     location: "{{ datacenter }}"
     template: "{{ server_vm_template }}"
     os_type:  "{{ server_physical_os }}"
