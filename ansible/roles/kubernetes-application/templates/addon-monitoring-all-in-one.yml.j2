@@ -4,25 +4,25 @@ kind: ServiceAccount
 metadata:
   name: heapster
   namespace: kube-system
----  
+---
 apiVersion: v1
 kind: Service
 metadata:
   name: monitoring-grafana
   namespace: kube-system
-  labels: 
+  labels:
     kubernetes.io/cluster-service: "true"
     kubernetes.io/name: "Grafana"
 spec:
   # On production clusters, consider setting up auth for grafana, and
   # exposing Grafana either using a LoadBalancer or a public IP.
   # type: LoadBalancer
-  ports: 
+  ports:
     - port: 80
       targetPort: 3000
-  selector: 
+  selector:
     k8s-app: influxGrafana
-    
+
 ---
 apiVersion: v1
 kind: ReplicationController
@@ -60,7 +60,7 @@ spec:
             - --sink=influxdb:http://monitoring-influxdb:8086
             - --stats_resolution=30s
             - --sink_frequency=1m
-            
+
 ---
 kind: Service
 apiVersion: v1
@@ -70,43 +70,43 @@ metadata:
   labels:
     kubernetes.io/cluster-service: "true"
     kubernetes.io/name: "Heapster"
-spec: 
-  ports: 
+spec:
+  ports:
     - port: 80
       targetPort: 8082
-  selector: 
+  selector:
     k8s-app: heapster
-    
+
 ---
 apiVersion: v1
 kind: ReplicationController
 metadata:
   name: monitoring-influxdb-grafana-v2
   namespace: kube-system
-  labels: 
+  labels:
     k8s-app: influxGrafana
     version: v2
     kubernetes.io/cluster-service: "true"
-spec: 
+spec:
   replicas: 1
-  selector: 
+  selector:
     k8s-app: influxGrafana
     version: v2
-  template: 
-    metadata: 
-      labels: 
+  template:
+    metadata:
+      labels:
         k8s-app: influxGrafana
         version: v2
         kubernetes.io/cluster-service: "true"
-    spec: 
-      containers: 
+    spec:
+      containers:
         - image: gcr.io/google_containers/heapster_influxdb:v0.4
           name: influxdb
           resources:
             limits:
               cpu: 100m
               memory: 200Mi
-          ports: 
+          ports:
             - containerPort: 8083
               hostPort: 8083
             - containerPort: 8086
@@ -140,7 +140,7 @@ spec:
           volumeMounts:
           - name: grafana-persistent-storage
             mountPath: /var
-              
+
       volumes:
       - name: influxdb-persistent-storage
         emptyDir: {}
@@ -154,17 +154,16 @@ kind: Service
 metadata:
   name: monitoring-influxdb
   namespace: kube-system
-  labels: 
+  labels:
     kubernetes.io/cluster-service: "true"
     kubernetes.io/name: "InfluxDB"
-spec: 
-  ports: 
+spec:
+  ports:
     - name: http
       port: 8083
       targetPort: 8083
     - name: api
       port: 8086
       targetPort: 8086
-  selector: 
+  selector:
     k8s-app: influxGrafana
-
