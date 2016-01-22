@@ -13,6 +13,9 @@ Clone this repository and cd into it.
 - `cd ansible`
 - Create the credentials file from the template, and `source credentials.sh`
 
+### Bash script instrcutions
+Fill me in
+
 ### Creating virtual hosts
 - Edit the playbook and variables as needed
   - Most particularly, set the `clc_cluster_name` variable, which will be incorporated in the name of the CenturyLink Cloud groups and in the name of the ansible inventory file.  It's not necessary to set this as a local environment variable, although you could for convenience.
