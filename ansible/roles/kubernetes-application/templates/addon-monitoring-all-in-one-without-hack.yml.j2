@@ -80,7 +80,7 @@ spec:
           command:
           - /heapster
           - --source=kubernetes:https://kubernetes.default
-          - --source="cadvisor:external?cadvisorPort=4194"
+          #- --source="cadvisor:external?cadvisorPort=4194"
           - --sink=influxdb:http://monitoring-influxdb:8086
             
 ---
