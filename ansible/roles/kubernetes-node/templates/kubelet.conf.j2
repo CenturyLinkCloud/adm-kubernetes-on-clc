@@ -9,7 +9,6 @@ script
 		--cadvisor-port=4194 \
 		--cluster-dns={{ cluster_dns_service_vip }} \
 		--cluster-domain={{ cluster_dns_domain }} \
-		--hostname-override={{ ansible_eth0.ipv4.address }} \
 		--hostname-override={{ ansible_ssh_host }} \
 		--kubeconfig="/var/lib/kubelet/kubeconfig"\
 		--serialize-image-pulls=false\
