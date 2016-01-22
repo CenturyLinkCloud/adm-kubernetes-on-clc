@@ -13,7 +13,7 @@ spec:
         component: elasticsearch
         role: {{ es_role }}
     spec:
-      # serviceAccount: elasticsearch
+      serviceAccount: elasticsearch
       containers:
       - name: es{{ app_label }}
         securityContext:
