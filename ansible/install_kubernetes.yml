@@ -1,20 +1,5 @@
 
 ---
-- name: Collect Facts
-  hosts: all
-  gather_facts: True
-
-  tasks:
-    - name: Set etcd url to seperate etcd cluster
-      set_fact:
-        etcd_endpoint: "{% for host in groups['etcd'] %}http://{{ hostvars[host]['ansible_default_ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
-        etcd_group: etcd
-      when: etcd_seperate_cluster is defined
-    - name: Set etcd url to master server
-      set_fact:
-        etcd_endpoint: "{% for host in groups['master'] %}http://{{ hostvars[host]['ansible_default_ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
-        etcd_group: master
-      when: etcd_seperate_cluster is undefined      
 
 - name: Kubernetes Master
   hosts: master
@@ -26,6 +11,18 @@
   pre_tasks:
     - name: set master ip address
       set_fact: master_ip={{ ansible_default_ipv4.address }}
+
+    - name: Set etcd url to seperate etcd cluster
+      set_fact:
+        etcd_endpoint: "{% for host in groups['etcd'] %}http://{{ hostvars[host]['ansible_default_ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
+        etcd_group: etcd
+      when: etcd_seperate_cluster is defined
+    - name: Set etcd url to master server
+      set_fact:
+        etcd_endpoint: "{% for host in groups['master'] %}http://{{ hostvars[host]['ansible_default_ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
+        etcd_group: master
+      when: etcd_seperate_cluster is undefined   
+      
   roles:
     - resolv
     - etcd
@@ -44,6 +41,19 @@
     - set_fact: apiserver_endpoint=http://{{ hostvars[ item ].ansible_default_ipv4.address }}:8080
       with_items: groups['master'][0]
 
+
+    - name: Set etcd url to seperate etcd cluster
+      set_fact:
+        etcd_endpoint: "{% for host in groups['etcd'] %}http://{{ hostvars[host]['ansible_default_ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
+        etcd_group: etcd
+      when: etcd_seperate_cluster is defined
+    - name: Set etcd url to master server
+      set_fact:
+        etcd_endpoint: "{% for host in groups['master'] %}http://{{ hostvars[host]['ansible_default_ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
+        etcd_group: master
+      when: etcd_seperate_cluster is undefined   
+      
+      
   roles:
     - resolv
     - etcd
