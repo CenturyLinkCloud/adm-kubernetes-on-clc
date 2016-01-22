@@ -87,7 +87,10 @@ echo ""
 
 
 
-
+#### Part0
+echo "Part0 - Create parent group"
+{ ansible-playbook create-parent-group.yml -e "$extra_args"; } &
+wait
 
 
 #### Part1a 
