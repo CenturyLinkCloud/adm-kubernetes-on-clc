@@ -8,10 +8,13 @@
 # > bash kube-up.sh 
 # 
 # Make a cluster with custom values (cluster of VMs)
-# > bash kube-up.sh --clc_cluster_name=k8s_vm101 --minion_type=vm --minion_count=6 --datacenter=WA1 --vm_memory=4 --vm_cpu=2
+# > bash kube-up.sh --clc_cluster_name=k8s_vm101 --minion_type=standard --minion_count=6 --datacenter=VA1 --vm_memory=4 --vm_cpu=2
 #
 # Make a cluster with custom values (cluster of physical servers)
 # > bash kube-up.sh --clc_cluster_name=k8s_vm101 --minion_type=bareMetal --minion_count=4 --datacenter=VA1 
+#
+# Make a cluster with custom values (cluster of VMs with a seperate cluster of etcd nodes)
+# > bash kube-up.sh --clc_cluster_name=k8s_vm101 --minion_type=standard --minion_count=6 --datacenter=VA1 --etcd_seperate_cluster=yes
 #
 
 extra_args="from_bash=true"
