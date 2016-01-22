@@ -14,7 +14,7 @@
 # > bash kube-up.sh --clc_cluster_name=k8s_vm101 --minion_type=bareMetal --minion_count=4 --datacenter=VA1 
 #
 # Make a cluster with custom values (cluster of VMs with a seperate cluster of etcd nodes)
-# > bash kube-up.sh --clc_cluster_name=k8s_vm101 --minion_type=standard --minion_count=6 --datacenter=VA1 --etcd_seperate_cluster=yes
+# > bash kube-up.sh --clc_cluster_name=k8s_vm101 --minion_type=standard --minion_count=6 --datacenter=VA1 --etcd_seperate_cluster
 #
 
 extra_args="from_bash=true"
@@ -53,19 +53,18 @@ case $i in
     shift # past argument=value
     ;;        
     
-    #etcd_seperate_cluster
-    -etc=*|--etcd_seperate_cluster=*)
-    etcd_seperate_cluster="${i#*=}"
-    extra_args="$extra_args etcd_seperate_cluster=$etcd_seperate_cluster"    
-    shift # past argument=value
-    ;; 
 
     -phyid=*|--server_conf_id=*)
     server_conf_id="${i#*=}"
     extra_args="$extra_args server_conf_id=$server_conf_id"    
     shift # past argument=value
     ;;        
-        
+    
+    --etcd_seperate_cluster)
+    etcd_seperate_cluster=YES
+    shift # past argument with no value
+    ;;
+    
     --default)
     DEFAULT=YES
     shift # past argument with no value
@@ -119,16 +118,16 @@ wait
 echo "Part2 - Setting up etcd"
 #install etcd on master or on seperate cluster of vms
 if [ -z ${etcd_seperate_cluster+x} ]; then 
-    { ansible-playbook -i hosts-$clc_cluster_name install_etcd_on_master.yml; } &
+    { ansible-playbook -i hosts-$clc_cluster_name install_etcd_on_master.yml  -e "$extra_args"; } &
 else
-    { ansible-playbook -i hosts-$clc_cluster_name install_etcd.yml; } &      
+    { ansible-playbook -i hosts-$clc_cluster_name install_etcd.yml  -e "$extra_args"; } &      
 fi
 wait
 
 
 #### Part3 
 echo "Part3 - Setting up kubernetes"
-{ ansible-playbook -i hosts-$clc_cluster_name install_kubernetes.yml; } &
+{ ansible-playbook -i hosts-$clc_cluster_name install_kubernetes.yml -e "$extra_args"; } &
 wait
 
 
