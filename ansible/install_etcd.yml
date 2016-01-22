@@ -5,7 +5,7 @@
   vars:
     - etcd_install_and_run_service: True
     
-  pretasks:
+  pre_tasks:
     - name: Set etcd url to seperate etcd cluster
       set_fact:
         etcd_endpoint: "{% for host in groups['etcd'] %}http://{{ hostvars[host]['ansible_default_ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
