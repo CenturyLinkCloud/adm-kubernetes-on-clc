@@ -1,0 +1,14 @@
+---
+- name: Finalize the ansible inventory file
+  hosts: localhost
+  gather_facts: False
+  connection: local
+
+  vars:
+    - clc_cluster_name: provisioning_test
+    - ansible_hosts_directory: "{{ clc_cluster_name }}.d"
+
+  tasks:
+
+    - name: concatenate elements
+      assemble: src="{{ ansible_hosts_directory }}" dest="hosts-{{ clc_cluster_name }}" delimiter="\n\n###"
