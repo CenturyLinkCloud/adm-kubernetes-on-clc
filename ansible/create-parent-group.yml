@@ -1,0 +1,23 @@
+---
+- name: Create parent group
+  hosts: localhost
+  gather_facts: False
+  connection: local
+  vars:
+    - clc_cluster_name: k8s
+    - ansible_hosts_directory: "{{ clc_cluster_name }}.d"
+    - server_group: master
+    - datacenter: VA1
+    - server_count: 1
+    - server_memory: 4
+    - server_cpu: 2
+    - skip_master: False
+    - async_time: 1200
+    - async_poll: 5
+
+  tasks:
+    - name: Ensure CenturyLink Cloud group {{ clc_cluster_name }} exists
+      clc_group:
+        name: "{{ clc_cluster_name }}"
+        location: "{{ datacenter }}"
+        state: present
