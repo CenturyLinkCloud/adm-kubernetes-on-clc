@@ -61,7 +61,9 @@ case $i in
     ;;
 
     --etcd_separate_cluster)
-    etcd_separate_cluster=YES
+    etcd_separate_cluster=yes
+    # the ansible variable "etcd_group" with default to the value "master"
+    extra_args="$extra_args etcd_group=etcd"
     shift # past argument with no value
     ;;
 
@@ -84,44 +86,38 @@ echo ""
 #echo "server_type    = ${server_type}"
 #echo "etcd_separate_cluster    = ${etcd_separate_cluster}"
 
-#echo "Extra Args   : ${extra_args}"
-#echo "ansible-playbook -i /usr/local/bin/clc_inv.py kubernetes-describe-cluster.yml $extra_args"
+echo "Extra Args   : ${extra_args}"
+echo "ansible-playbook -i /usr/local/bin/clc_inv.py kubernetes-describe-cluster.yml $extra_args"
 
-
-
-#### Part0
-echo "Part0 - Create parent group"
-{ ansible-playbook create-parent-group.yml -e "$extra_args"; } &
-wait
-
-
-#### Part1a
-echo "Part1a -  Building out the infrastructure on CLC"
-{ ansible-playbook create-master-hosts.yml -e "$extra_args"; } &
-{ ansible-playbook create-minion-hosts.yml -e "$extra_args"; } &
-if [ -z ${etcd_separate_cluster+x} ]; then
-    echo "ETCD will be installed on master server"
-else
-    echo "ETCD will be installed on 3 separate VMs not part of k8s cluster"
-    { ansible-playbook create-etcd-hosts.yml -e "$extra_args"; } &
-fi
-wait
-
-#### Part1b
-echo "Part1b -  create hosts file"
-{ ansible-playbook create-hosts-file.yml -e "$extra_args"; } &
-wait
-
+# #### Part0
+# echo "Part0 - Create parent group"
+# { ansible-playbook create-parent-group.yml -e "$extra_args"; } &
+# wait
+#
+#
+# #### Part1a
+# echo "Part1a -  Building out the infrastructure on CLC"
+# { ansible-playbook create-master-hosts.yml -e "$extra_args"; } &
+# { ansible-playbook create-minion-hosts.yml -e "$extra_args"; } &
+# if [ -z ${etcd_separate_cluster+x} ]; then
+#     echo "ETCD will be installed on master server"
+# else
+#     echo "ETCD will be installed on 3 separate VMs not part of k8s cluster"
+# fi
+# { ansible-playbook create-etcd-hosts.yml -e "$extra_args"; } &
+# wait
+#
+# #### Part1b
+# echo "Part1b -  create hosts file"
+# { ansible-playbook create-hosts-file.yml -e "$extra_args"; } &
+# wait
+#
 
 
 #### Part2
 echo "Part2 - Setting up etcd"
 #install etcd on master or on separate cluster of vms
-if [ -z ${etcd_separate_cluster+x} ]; then
-    { ansible-playbook -i hosts-$clc_cluster_name install_etcd_on_master.yml  -e "$extra_args"; } &
-else
-    { ansible-playbook -i hosts-$clc_cluster_name install_etcd.yml  -e "$extra_args"; } &
-fi
+{ ansible-playbook -i hosts-$clc_cluster_name install_etcd.yml -e "$extra_args"; } &
 wait
 
 

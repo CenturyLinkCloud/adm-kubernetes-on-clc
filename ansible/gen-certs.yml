@@ -3,7 +3,8 @@
   gather_facts: True
 
 
-- hosts: localhost
+- name: Create certificate authority and certs on localhost
+  hosts: localhost
   gather_facts: True
   connection: local
 
@@ -53,7 +54,6 @@
     #  with_items: groups['master']
 
     - name: Generate server key
-      name: apiserver-key
       shell: openssl genrsa -out "{{ cert_dir }}/server.key" 2048
 
     - name: Generate server request
@@ -123,7 +123,8 @@
       run_once: true
 
 
-- hosts:
+- name: Copy certificates to master
+  hosts:
   - master
 
   vars:
@@ -147,18 +148,15 @@
        - server.key
 
 
-- hosts:
+- name: Copy configuration to minion
+  hosts:
   - minion
 
   tasks:
 
-    - debug: var=hostvars['localhost']
-
     - set_fact: ca_cert_b64="{{ hostvars['localhost']['ca_cert']['content'] }}"
     - set_fact: kubecfg_cert_b64="{{ hostvars['localhost']['kubecfg_crt']['content'] }}"
     - set_fact: kubecfg_key_b64="{{ hostvars['localhost']['kubecfg_key']['content'] }}"
-
-    #- debug: var=ca_cert_b64
 
     - name: Create kubelet/kube-proxy config directory
       file:

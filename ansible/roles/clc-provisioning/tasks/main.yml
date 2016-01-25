@@ -8,8 +8,8 @@
     location: "{{ datacenter }}"
     state: present
 
-- name: Do something regarding the network for the servers
-  debug: msg="TODO, for now, we'll use defaults"
+# - name: Do something regarding the network for the servers
+#   debug: msg="TODO, for now, we'll use defaults"
 
 - name: Prepare local certificate store
   file: path={{ server_cert_store }} state=directory mode=0755

@@ -7,16 +7,9 @@
 
   tasks:
 
-    - name: Set etcd url to separate etcd cluster
+    - name: Set etcd url for cluster in group "{{ etcd_group }}"
       set_fact:
-        etcd_endpoint: "{% for host in groups['etcd'] %}http://{{ hostvars[host]['ansible_default_ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
-        etcd_group: etcd
-      when: etcd_separate_cluster is defined
-    - name: Set etcd url to master server
-      set_fact:
-        etcd_endpoint: "{% for host in groups['master'] %}http://{{ hostvars[host]['ansible_default_ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
-        etcd_group: master
-      when: etcd_separate_cluster is undefined
+        etcd_endpoint: "{% for host in groups[etcd_group] %}http://{{ hostvars[host]['ansible_default_ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
 
 # Certificates are generated locally, copied out to master and minion
 - include: gen-certs.yml
