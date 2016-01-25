@@ -86,8 +86,8 @@ echo ""
 #echo "server_type    = ${server_type}"
 #echo "etcd_separate_cluster    = ${etcd_separate_cluster}"
 
-echo "Extra Args   : ${extra_args}"
-echo "ansible-playbook -i /usr/local/bin/clc_inv.py kubernetes-describe-cluster.yml $extra_args"
+# echo "Extra Args   : ${extra_args}"
+# echo "ansible-playbook -i /usr/local/bin/clc_inv.py kubernetes-describe-cluster.yml $extra_args"
 
 #### Part0
 echo "Part0 - Create parent group"
