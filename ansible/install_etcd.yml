@@ -4,19 +4,19 @@
   gather_facts: True
   vars:
     - etcd_install_and_run_service: True
-    
+
   pre_tasks:
-    - name: Set etcd url to seperate etcd cluster
+    - name: Set etcd url to separate etcd cluster
       set_fact:
         etcd_endpoint: "{% for host in groups['etcd'] %}http://{{ hostvars[host]['ansible_default_ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
         etcd_group: etcd
-      when: etcd_seperate_cluster is defined
-      
+      when: etcd_separate_cluster is defined
+
     - name: Set etcd url to master server
       set_fact:
         etcd_endpoint: "{% for host in groups['master'] %}http://{{ hostvars[host]['ansible_default_ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
         etcd_group: master
-      when: etcd_seperate_cluster is undefined      
+      when: etcd_separate_cluster is undefined
 
   roles:
     - etcd
