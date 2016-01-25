@@ -1,0 +1,56 @@
+
+- name: install elasticsearch service
+  hosts: master[0]
+  vars:
+    kubernetes_applications:
+      - es-service-account
+      - es-svc
+      - es-discovery-svc
+  roles:
+    - kubernetes-application
+
+
+- name: install elasticsearch master nodes
+  hosts: master[0]
+  vars:
+    kubernetes_applications:
+      - es-rc
+    application_tag: master
+    es_cluster_name: es_in_k8s
+    es_role: master
+    es_replica_count: 1
+    es_is_master_node: true
+    es_is_data_node: false
+    es_enable_http: false
+  roles:
+    - kubernetes-application
+
+- name: install elasticsearch data nodes
+  hosts: master[0]
+  vars:
+    kubernetes_applications:
+      - es-rc
+    application_tag: data
+    es_cluster_name: es_in_k8s
+    es_role: data
+    es_replica_count: 3
+    es_is_master_node: false
+    es_is_data_node: true
+    es_enable_http: false
+  roles:
+    - kubernetes-application
+
+- name: install elasticsearch client nodes
+  hosts: master[0]
+  vars:
+    kubernetes_applications:
+      - es-rc
+    application_tag: client
+    es_cluster_name: es_in_k8s
+    es_role: client
+    es_replica_count: 2
+    es_is_master_node: true
+    es_is_data_node: false
+    es_enable_http: true
+  roles:
+    - kubernetes-application

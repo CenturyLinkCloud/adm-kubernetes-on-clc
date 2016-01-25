@@ -1,0 +1,169 @@
+---
+- hosts: all
+  gather_facts: True
+
+
+- name: Create certificate authority and certs on localhost
+  hosts: localhost
+  gather_facts: True
+  connection: local
+
+  vars_files:
+    - vars.yml
+
+  vars:
+    - clc_cluster_name: k8s_cluster
+    - cert_dir: "{{ clc_cluster_name }}/k8s_certs"
+
+  tasks:
+
+    - name: Create certificate directory
+      file:
+        path: "{{ cert_dir }}"
+        state: directory
+
+    - name: Template openssl configuration (server)
+      template:
+        src: openssl.cnf.j2
+        dest: "{{ cert_dir }}/openssl.cnf"
+
+    - name: Template openssl configuration (client)
+      template:
+        src: openssl-client.cnf.j2
+        dest: "{{ cert_dir }}/openssl-client.cnf"
+
+    - name: Generate CA key
+      shell: >
+        openssl genrsa
+        -out "{{ cert_dir }}/ca-key.pem"
+        2048
+
+    - name: Generate CA cert
+      shell: >
+        openssl req
+        -x509
+        -sha256
+        -new
+        -nodes
+        -key "{{ cert_dir }}/ca-key.pem"
+        -days 10000
+        -out "{{ cert_dir }}/ca.crt"
+        -subj "/CN=kube-ca"
+
+    #- debug: var=hostvars[item]['ansible_default_ipv4']
+    #  with_items: groups['master']
+
+    - name: Generate server key
+      shell: openssl genrsa -out "{{ cert_dir }}/server.key" 2048
+
+    - name: Generate server request
+      shell: >
+        openssl req
+        -new
+        -sha256
+        -key "{{ cert_dir }}/server.key"
+        -subj "/CN=kubernetes-master"
+        -config "{{ cert_dir }}/openssl.cnf"
+        -out "{{ cert_dir }}/server.csr"
+
+    - name: Generate server cert
+      shell: >
+        openssl x509 -req
+        -sha256
+        -in "{{ cert_dir }}/server.csr"
+        -CA "{{ cert_dir }}/ca.crt"
+        -CAkey "{{ cert_dir }}/ca-key.pem"
+        -CAcreateserial
+        -days 365
+        -extensions v3_req
+        -extfile "{{ cert_dir }}/openssl.cnf"
+        -out "{{ cert_dir }}/server.cert"
+
+
+    - name: Generate client key
+      shell: >
+        openssl genrsa
+        -out "{{ cert_dir }}/kubecfg.key"
+        2048
+
+    - name: Generate client request
+      shell: >
+        openssl req
+        -new
+        -key "{{ cert_dir }}/kubecfg.key"
+        -out "{{ cert_dir }}/kubecfg.csr"
+        -subj "/CN=kubecfg"
+        -config "{{ cert_dir }}/openssl-client.cnf"
+
+    - name: Generate client cert
+      shell: >
+        openssl x509 -req
+        -in "{{ cert_dir }}/kubecfg.csr"
+        -CA "{{ cert_dir }}/ca.crt"
+        -CAkey "{{ cert_dir }}/ca-key.pem"
+        -CAcreateserial
+        -out "{{ cert_dir }}/kubecfg.crt"
+        -days 365
+        -extensions v3_req
+        -extfile "{{ cert_dir }}/openssl-client.cnf"
+
+    - name: Read base64 ca cert
+      slurp: src="{{ cert_dir }}/ca.crt"
+      register: ca_cert
+      run_once: true
+
+    - name: Read base64 client key
+      slurp: src="{{ cert_dir }}/kubecfg.key"
+      register: kubecfg_key
+      run_once: true
+
+    - name: Read base64 client cert
+      slurp: src="{{ cert_dir }}/kubecfg.crt"
+      register: kubecfg_crt
+      run_once: true
+
+
+- name: Copy certificates to master
+  hosts:
+  - master
+
+  vars:
+    - clc_cluster_name: k8s_cluster
+    - cert_dir: "{{ clc_cluster_name }}/k8s_certs"
+
+  tasks:
+
+    - name: Create server cert directory
+      file:
+       path: "/srv/kubernetes"
+       state: directory
+
+    - name: Copy server files
+      copy:
+       src: "{{ cert_dir }}/{{ item }}"
+       dest: "/srv/kubernetes/{{ item }}"
+      with_items:
+       - ca.crt
+       - server.cert
+       - server.key
+
+
+- name: Copy configuration to minion
+  hosts:
+  - minion
+
+  tasks:
+
+    - set_fact: ca_cert_b64="{{ hostvars['localhost']['ca_cert']['content'] }}"
+    - set_fact: kubecfg_cert_b64="{{ hostvars['localhost']['kubecfg_crt']['content'] }}"
+    - set_fact: kubecfg_key_b64="{{ hostvars['localhost']['kubecfg_key']['content'] }}"
+
+    - name: Create kubelet/kube-proxy config directory
+      file:
+        path: /var/lib/kubelet
+        state: directory
+
+    - name: Template kubelet config with certificate data
+      template:
+        src: roles/kubernetes-node/templates/kubelet-kubeconfig.j2
+        dest: /var/lib/kubelet/kubeconfig

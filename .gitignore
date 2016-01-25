@@ -1,12 +1,4 @@
-/.project
-/.pydevproject
-
-# ignore the files from python virtualenv
-bin/
-include/
-lib/
-.Python
-pip-selfcheck.json
+not-tracked/
 
 # don't put credentials in source control
 certificates/
