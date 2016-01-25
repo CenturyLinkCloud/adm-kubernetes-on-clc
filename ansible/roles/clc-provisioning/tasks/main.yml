@@ -11,17 +11,6 @@
 # - name: Do something regarding the network for the servers
 #   debug: msg="TODO, for now, we'll use defaults"
 
-- name: Prepare local certificate store
-  file: path={{ server_cert_store }} state=directory mode=0755
-
-- name: Prepare local certificate file
-  stat: path="{{ server_cert_store }}/id_rsa"
-  register: sshkeyfile
-
-- name: Establish local ssh key
-  command: ssh-keygen -N '' -f {{ server_cert_store }}/id_rsa
-  when: sshkeyfile.stat.exists == False
-
 - name: Create CLC servers in group {{ clc_cluster_name }}.{{ server_group }}, server count is {{ server_count }}
   clc_server:
     name: "{{ server_group }}"

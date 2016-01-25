@@ -90,7 +90,10 @@ echo ""
 # echo "ansible-playbook -i /usr/local/bin/clc_inv.py kubernetes-describe-cluster.yml $extra_args"
 
 #### Part0
-echo "Part0 - Create parent group"
+echo "Part0a - Create local sshkey if necessary"
+ansible-playbook create-local-sshkey.yml
+
+echo "Part0b - Create parent group"
 { ansible-playbook create-parent-group.yml -e "$extra_args"; } &
 wait
 
