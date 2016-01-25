@@ -106,8 +106,8 @@ if [ -z ${etcd_separate_cluster+x} ]; then
     echo "ETCD will be installed on master server"
 else
     echo "ETCD will be installed on 3 separate VMs not part of k8s cluster"
+    { ansible-playbook create-etcd-hosts.yml -e "$extra_args"; } &
 fi
-{ ansible-playbook create-etcd-hosts.yml -e "$extra_args"; } &
 wait
 
 #### Part1b
