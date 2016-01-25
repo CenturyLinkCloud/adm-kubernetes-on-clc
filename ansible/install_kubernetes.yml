@@ -1,21 +1,28 @@
-
 ---
+
+# Collect IP addresses for etcd
 - name: Collect Facts
   hosts: all
   gather_facts: True
 
   tasks:
+
     - name: Set etcd url
       set_fact:
         etcd_endpoint: "{% for host in groups['etcd'] %}http://{{ hostvars[host]['ansible_default_ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
 
 
+# Certificates are generated locally, copied out to master and minion
+- include: gen-certs.yml
+
+# Provision  master
 - name: Kubernetes Master
   hosts: master
   gather_facts: True
   vars_files:
     - vars.yml
   vars:
+    # TODO - apiserver_endpoint: https://{{ ansible_default_ipv4.address }}:6443
     - apiserver_endpoint: http://{{ ansible_default_ipv4.address }}:8080
   pre_tasks:
     - name: set master ip address
@@ -30,11 +37,12 @@
     - kubernetes-node
     - kubernetes-master
 
-
+# Provision minion_type
 - hosts: Kubernetes minion
   vars_files:
     - vars.yml
   pre_tasks:
+    # TODO - set_fact: apiserver_endpoint=https://{{ hostvars[ item ].ansible_default_ipv4.address }}:6443
     - set_fact: apiserver_endpoint=http://{{ hostvars[ item ].ansible_default_ipv4.address }}:8080
       with_items: groups['master'][0]
 
@@ -48,6 +56,7 @@
     - kubernetes
     - kubernetes-node
 
+# Install system applications
 - name: install DNS and UI applications
   hosts: master[0]
   gather_facts: True
@@ -57,6 +66,7 @@
     - kubernetes_application:
        - skydns
        - kube-ui
+    # TODO - apiserver_endpoint: https://{{ ansible_default_ipv4.address }}:6443
     - apiserver_endpoint: http://{{ ansible_default_ipv4.address }}:8080
   roles:
     - kubernetes-application
