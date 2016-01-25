@@ -1,6 +1,6 @@
 ---
 - name: Install etcd
-  hosts: etcd
+  hosts: master
   gather_facts: True
   vars:
     - etcd_install_and_run_service: True

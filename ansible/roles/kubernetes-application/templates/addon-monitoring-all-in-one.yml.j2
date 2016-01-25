@@ -69,7 +69,7 @@ spec:
         version: v10
         kubernetes.io/cluster-service: "true"
     spec:
-      serviceAccount: "heapster"
+      #serviceAccount: "heapster"
       containers:
         - image: gcr.io/google_containers/heapster:v0.18.2
           name: heapster
@@ -78,13 +78,11 @@ spec:
               cpu: 100m
               memory: 300Mi
           command:
-            - /heapster
-            #- --source=kubernetes:''
-            - "--source=kubernetes:https://kubernetes.default?inClusterConfig=false&useServiceAccount=true&insecure=true&auth="
-            - --sink=influxdb:http://monitoring-influxdb.kube-system.svc.local:8086
-            - --stats_resolution=30s
-            - --sink_frequency=1m
-
+          - /heapster
+          - --source=kubernetes:https://kubernetes.default
+          #- --source="cadvisor:external?cadvisorPort=4194"
+          - --sink=influxdb:http://monitoring-influxdb:8086
+            
 ---
 kind: Service
 apiVersion: v1
@@ -123,7 +121,7 @@ spec:
         version: v2
         kubernetes.io/cluster-service: "true"
     spec:
-      serviceAccount: "influx-grafana"
+      #serviceAccount: "influx-grafana"
       containers:
         - image: gcr.io/google_containers/heapster_influxdb:v0.4
           name: influxdb
@@ -171,3 +169,4 @@ spec:
         emptyDir: {}
       - name: grafana-persistent-storage
         emptyDir: {}
+
