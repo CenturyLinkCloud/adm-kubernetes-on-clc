@@ -1,10 +1,17 @@
 ---
+- name: Check ansible version
+  hosts: localhost0
+  gather_facts: False
+  connection: local
+  tasks:
+    - fail: msg="This playbook requires Ansible 2.0 or greater (found {{ ansible_version.full }})."
+      when: "{{ ansible_version|version_compare(2.0,'<') }}"
 
 - name: Get machine resources for k8s minion
   hosts: localhost
   gather_facts: False
   connection: local
-  # Both vars declrations need to be the same. I have this when hack in place to override sertype for minions only. 
+  # Both vars declrations need to be the same. I have this when hack in place to override sertype for minions only.
   vars:
     - clc_cluster_name: k8s
     - ansible_hosts_directory: "{{ clc_cluster_name }}.d"
@@ -15,8 +22,8 @@
     - server_cpu: 2
     - skip_minion: False
     - async_time: 1200
-    - async_poll: 5    
-  
+    - async_poll: 5
+
   pre_tasks:
     - name: Check for Minion_type
       set_fact:
@@ -34,13 +41,13 @@
       set_fact:
         server_memory: "{{ vm_memory }}"
       when: vm_memory is defined
-      
-      
+
+
     - name: Set Async time differently if type = bareMetal
       set_fact:
         async_time: 3600
-        async_poll: 10 
+        async_poll: 10
       when: server_type == "bateMetal"
 
-  roles: 
-    - { role: clc-provisioning, when: skip_minion == False }    
+  roles:
+    - { role: clc-provisioning, when: skip_minion == False }

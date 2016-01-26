@@ -1,8 +1,14 @@
 ---
 
 #### OLD FILE. DO NOT USE ANYMORE. INSTEAD, USE individual FILES
-
-
+- name: Check ansible version
+  hosts: localhost0
+  gather_facts: False
+  connection: local
+  tasks:
+    - fail: msg="This playbook requires Ansible 2.0 or greater (found {{ ansible_version.full }})."
+      when: "{{ ansible_version|version_compare(2.0,'<') }}"
+    
 - name: Get machine resources for etcd
   hosts: localhost
   gather_facts: False
