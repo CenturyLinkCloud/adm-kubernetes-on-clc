@@ -39,8 +39,8 @@
       SshKey: "{{ lookup('file', '{{ server_cert_store }}/id_rsa.pub') }}"
   with_flattened:
     - clc_servers.servers
-  async: 600
-  poll: 5
+  async: "{{ async_time }}"
+  poll: "{{ async_poll }}"
 
 - name: Make sure hosts directory exists
   file:

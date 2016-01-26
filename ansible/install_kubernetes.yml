@@ -63,7 +63,7 @@
   vars_files:
     - vars.yml
   vars:
-    - kubernetes_application:
+    - kubernetes_applications:
        - skydns
        - kube-ui
     # TODO - apiserver_endpoint: https://{{ ansible_default_ipv4.address }}:6443
