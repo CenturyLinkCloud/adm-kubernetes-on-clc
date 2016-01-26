@@ -2,11 +2,13 @@
 - name: Collect Facts
   hosts: all
   gather_facts: True
+  vars_files:
+    - vars.yml
 
   tasks:
     - name: Set etcd url
       set_fact:
-        etcd_endpoint: "{% for host in groups['etcd'] %}http://{{ hostvars[host]['ansible_default_ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
+        etcd_endpoint: "{% for host in groups[etcd_group] %}http://{{ hostvars[host]['ansible_default_ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
 
 - hosts: master[0]
   gather_facts: True
