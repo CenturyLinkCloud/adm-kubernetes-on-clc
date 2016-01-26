@@ -75,8 +75,8 @@ spec:
           name: heapster
           resources:
             limits:
-              cpu: 100m
-              memory: 300Mi
+              cpu: 600m
+              memory: 900Mi
           command:
           - /heapster
           - --source=kubernetes:https://kubernetes.default
@@ -127,8 +127,8 @@ spec:
           name: influxdb
           resources:
             limits:
-              cpu: 100m
-              memory: 200Mi
+              cpu: 900m
+              memory: 900Mi
           ports:
             - containerPort: 8083
               hostPort: 8083
