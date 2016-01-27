@@ -37,6 +37,8 @@
         openssl genrsa
         -out "{{ cert_dir }}/ca-key.pem"
         2048
+      args:
+        creates: "{{ cert_dir }}/ca-key.pem"
 
     - name: Generate CA cert
       shell: >
@@ -47,14 +49,21 @@
         -nodes
         -key "{{ cert_dir }}/ca-key.pem"
         -days 10000
-        -out "{{ cert_dir }}/ca.crt"
         -subj "/CN=kube-ca"
+        -out "{{ cert_dir }}/ca.crt"
+      args:
+        creates: "{{ cert_dir }}/ca.crt"
+
 
     #- debug: var=hostvars[item]['ansible_default_ipv4']
     #  with_items: groups['master']
 
     - name: Generate server key
-      shell: openssl genrsa -out "{{ cert_dir }}/server.key" 2048
+      shell: >
+        openssl genrsa
+        -out "{{ cert_dir }}/server.key" 2048
+      args:
+        creates:  "{{ cert_dir }}/server.key"
 
     - name: Generate server request
       shell: >
@@ -65,6 +74,8 @@
         -subj "/CN=kubernetes-master"
         -config "{{ cert_dir }}/openssl.cnf"
         -out "{{ cert_dir }}/server.csr"
+      args:
+        creates: "{{ cert_dir }}/server.csr"
 
     - name: Generate server cert
       shell: >
@@ -78,6 +89,8 @@
         -extensions v3_req
         -extfile "{{ cert_dir }}/openssl.cnf"
         -out "{{ cert_dir }}/server.cert"
+      args:
+        creates: "{{ cert_dir }}/server.cert"
 
 
     - name: Generate client key
@@ -85,6 +98,8 @@
         openssl genrsa
         -out "{{ cert_dir }}/kubecfg.key"
         2048
+      args:
+        creates: "{{ cert_dir }}/kubecfg.key"
 
     - name: Generate client request
       shell: >
@@ -94,6 +109,8 @@
         -out "{{ cert_dir }}/kubecfg.csr"
         -subj "/CN=kubecfg"
         -config "{{ cert_dir }}/openssl-client.cnf"
+      args:
+        creates: "{{ cert_dir }}/openssl-client.cnf"
 
     - name: Generate client cert
       shell: >
@@ -106,6 +123,8 @@
         -days 365
         -extensions v3_req
         -extfile "{{ cert_dir }}/openssl-client.cnf"
+      args:
+        creates:  "{{ cert_dir }}/openssl-client.cnf"
 
     - name: Read base64 ca cert
       slurp: src="{{ cert_dir }}/ca.crt"
