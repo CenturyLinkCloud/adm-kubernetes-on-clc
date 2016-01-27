@@ -1,5 +1,5 @@
 #!/bin/sh
-#
+set -e
 # deploy k8s cluster on clc
 #
 # Examples:
@@ -25,8 +25,9 @@ Create servers in the CenturyLinkCloud environment and initialize a Kubernetes c
 Environment variables CLC_V2_API_USERNAME and CLC_V2_API_PASSWD must be set in
 order to access the CenturyLinkCloud API
 
-All options (both short and long form) require arguments, and must include "="
-between option name and option value.
+Most options (both short and long form) require arguments, and must include "="
+between option name and option value.  _--help_ and _--etcd_separate_cluster_ do
+not take arguments
 
      -h (--help)                   display this help and exit
      -c= (--clc_cluster_name=)     set the name of the cluster, as used in CLC group names
@@ -39,7 +40,7 @@ between option name and option value.
                                       physical_server_20_core_conf_id
                                       physical_server_12_core_conf_id
                                       physical_server_4_core_conf_id (default)
-     -etcd_separate_cluster=yes    create a separate cluster of three etcd nodes,
+     --etcd_separate_cluster       create a separate cluster of three etcd nodes,
                                    otherwise run etcd on the master node
 EOF
 }
@@ -95,9 +96,9 @@ case $i in
     shift # past argument=value
     ;;
 
-    --etcd_separate_cluster)
+    --etcd_separate_cluster*)
+    # the ansible variable "etcd_group" has default value "master"
     etcd_separate_cluster=yes
-    # the ansible variable "etcd_group" with default to the value "master"
     extra_args="$extra_args etcd_group=etcd"
     shift # past argument with no value
     ;;
