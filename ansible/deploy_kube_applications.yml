@@ -20,4 +20,4 @@
     - name: set master ip address
       set_fact: ip_address={{ ansible_default_ipv4.address }}
   roles:
-    - kubernetes-application
+    - kubernetes-manifest

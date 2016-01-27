@@ -17,11 +17,47 @@
 # > bash kube-up.sh --clc_cluster_name=k8s_vm101 --minion_type=standard --minion_count=6 --datacenter=VA1 --etcd_separate_cluster
 #
 
+# Usage info
+function show_help() {
+cat << EOF
+Usage: ${0##*/} [OPTIONS]
+Create servers in the CenturyLinkCloud environment and initialize a Kubernetes cluster
+Environment variables CLC_V2_API_USERNAME and CLC_V2_API_PASSWD must be set in
+order to access the CenturyLinkCloud API
+
+All options (both short and long form) require arguments, and must include "="
+between option name and option value.
+
+     -h (--help)                   display this help and exit
+     -c= (--clc_cluster_name=)     set the name of the cluster, as used in CLC group names
+     -t= (--minion_type=)          standard -> VM (default), bareMetal -> physical]
+     -d= (--datacenter=)           VA1 (default)
+     -m= (--minion_count=)         number of kubernetes minion nodes
+     -mem= (--vm_memory=)          number of GB ram for each minion
+     -cpu= (--vm_cpu=)             number of virtual cps for each minion node
+     -phyid= (--server_conf_id=)   physical server configuration id, one of
+                                      physical_server_20_core_conf_id
+                                      physical_server_12_core_conf_id
+                                      physical_server_4_core_conf_id (default)
+     -etcd_separate_cluster=yes    create a separate cluster of three etcd nodes,
+                                   otherwise run etcd on the master node
+EOF
+}
+
+function exit_message() {
+    echo "ERROR: $1" >&2
+    exit 1
+}
+
 extra_args="from_bash=true"
 
 for i in "$@"
 do
 case $i in
+    -h|--help)
+    show_help && exit 0
+    shift # past argument=value
+    ;;
     -c=*|--clc_cluster_name=*)
     clc_cluster_name="${i#*=}"
     extra_args="$extra_args clc_cluster_name=$clc_cluster_name"
@@ -53,10 +89,9 @@ case $i in
     shift # past argument=value
     ;;
 
-
     -phyid=*|--server_conf_id=*)
     server_conf_id="${i#*=}"
-    extra_args="$extra_args server_conf_id=$server_conf_id"
+    extra_args="$extra_args server_config_id=$server_conf_id"
     shift # past argument=value
     ;;
 
@@ -77,6 +112,10 @@ case $i in
 esac
 done
 
+if [ -z ${CLC_V2_API_USERNAME:-} ] || [ -z ${CLC_V2_API_PASSWD:-}]
+  then
+  exit_message 'Environment variables CLC_V2_API_USERNAME, CLC_V2_API_PASSWD must be set'
+fi
 
 echo "Creating Kubernetes Cluster on CenturyLink Cloud"
 echo ""
@@ -127,6 +166,13 @@ wait
 #### Part3
 echo "Part3 - Setting up kubernetes"
 { ansible-playbook -i hosts-$clc_cluster_name install_kubernetes.yml -e "$extra_args"; } &
+wait
+
+
+#### Part4
+echo "Part4 - Installing standard addons"
+standard_addons='{"k8s_apps":["skydns","kube-ui"]}'
+{ ansible-playbook -i hosts-$clc_cluster_name deploy_kube_applications.yml -e ${standard_addons}; } &
 wait
 
 

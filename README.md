@@ -1,8 +1,13 @@
 # Building a Kubernetes cluster on CenturyLink Cloud
-## Getting Started
-### Requirements
-- local installation of ansible _version 2.0_ or newer.  If on OSX, try
-- installing with `brew install ansible`
+
+The repository contains a set of ansible playbooks and roles to automate the
+process of getting a Kubernetes cluster up and running on CenturyLink Cloud.
+
+The playbooks can be run by themselves, or with the shell script _kube-up.sh_
+
+## Requirements
+
+- local installation of ansible _version 2.0_ or newer.  If on OSX, try installing with `brew install ansible`
 - python and pip
 - A CenturyLink Cloud account with rights to create new hosts
 
@@ -13,45 +18,107 @@ Clone this repository and cd into it.
 - `cd ansible`
 - Create the credentials file from the template, and `source credentials.sh`
 
-### Bash script instrcutions
-Fill me in
 
-### Creating virtual hosts
-- Edit the playbook and variables as needed
-  - Most particularly, set the `clc_cluster_name` variable, which will be incorporated in the name of the CenturyLink Cloud groups and in the name of the ansible inventory file.  It's not necessary to set this as a local environment variable, although you could for convenience.
-  - Currently variables should be set by editing the `create-clc-hosts.yml` file itself.  Read the different plays in the playbook to familiarize yourself with it.
+For example, here's a short set of commands for initializing an ansible master on Ubuntu 14:
+```
+  # system
+  apt-get update
+  apt-get install -y git python python-crypto
+  curl -O https://bootstrap.pypa.io/get-pip.py
+  python get-pip.py
 
-- Run `ansible-playbook create-clc-hosts.yml`
+  # git
+  git config --global user.name User.Name
+  git config --global user.email user@example.com
+  git config --global credential.helper cache
 
-### What it does
-All these tasks run on localhost and make http calls to the CenturyLink Cloud API.
-- Creates some VMs that will serve as an etcd cluster
-- Creates some VMs that will serve as kubernetes master(s)
-- Creates some VMs that will serve as kubernetes minions
+  # installing this repository
+  mkdir -p /home/development
+  cd /home/development/
+  git clone https://github.com/CenturyLinkCloud/adm-kubernetes-on-clc.git
+  cd adm-kubernetes-on-clc/
+  pip install -r requirements.txt
 
-Within each play, the `clc-provisioning` role writes a fragment of an inventory file to a subdirectory.  The final play concatenates them together to make a final inventory file (named _hosts-${CLC_CLUSTER_NAME}_ that will be used in provisioning these hosts.
+  # getting started
+  cd ansible
+  cp credentials.sh.template credentials.sh; vi credentials.sh
+  source credentials.sh
+```
 
-## Provisioning the cluster
-### Installing etcd
-`ansible-playbook -i hosts-${CLC_CLUSTER_NAME} install_etcd.yml`
+## Bash script instructions
 
-Celery quandong swiss chard chicory earthnut pea potato. Salsify taro catsear garlic gram celery bitterleaf wattle seed collard greens nori. Grape wattle seed kombu beetroot horseradish carrot squash brussels sprout chard.
+The cluster creation uses ansible to create hosts and to install kubernetes.  
+For convenience, a single shell script is used to carry out all of the tasks.
 
-### Installing Kubernetes
-`ansible-playbook -i hosts-${CLC_CLUSTER_NAME} install_kubernetes.yml`
+```
+Usage: kube-up.sh [OPTIONS]
+Create servers in the CenturyLinkCloud environment and initialize a Kubernetes cluster
+Environment variables CLC_V2_API_USERNAME and CLC_V2_API_PASSWD must be set in
+order to access the CenturyLinkCloud API
 
-Nori grape silver beet broccoli kombu beet greens fava bean potato quandong celery. Bunya nuts black-eyed pea prairie turnip leek lentil turnip greens parsnip. Sea lettuce lettuce water chestnut eggplant winter purslane fennel azuki bean earthnut pea sierra leone bologi leek soko chicory  parsley jicama salsify.
+All options (both short and long form) require arguments, and must include "="
+between option name and option value.
 
-## Running Kubernetes applications
-There are templates in the role _kubernetes-application_ already written for several applications.  These can be applied with the _install_kubernetes.yml_ playbook
+     -h (--help)                   display this help and exit
+     -c= (--clc_cluster_name=)     set the name of the cluster, as used in CLC group names
+     -t= (--minion_type=)          standard -> VM (default), bareMetal -> physical]
+     -d= (--datacenter=)           VA1 (default)
+     -m= (--minion_count=)         number of kubernetes minion nodes
+     -mem= (--vm_memory=)          number of GB ram for each minion
+     -cpu= (--vm_cpu=)             number of virtual cps for each minion node
+     -phyid= (--server_conf_id=)   physical server configuration id, one of
+                                      physical_server_20_core_conf_id
+                                      physical_server_12_core_conf_id
+                                      physical_server_4_core_conf_id (default)
+     -etcd_separate_cluster=yes    create a separate cluster of three etcd nodes,
+                                   otherwise run etcd on the master node
+```
 
-`my_app=guestbook-all-in-one` # for example
+For example, to create a cluster with
 
-`ansible-playbook -i hosts-${CLC_CLUSTER_NAME} -e kubernetes_applications=${my_app} kubernetes-apps.yml`
+```
+ ./kube-up.sh --clc_cluster_name=k8s_etcd_m6 --minion_type=standard --minion_count=6 --datacenter=VA1 --etcd_separate_cluster=yes
+```
+## More about the ansible playbooks
 
-Gumbo beet greens corn soko endive gumbo gourd. Parsley shallot courgette tatsoi pea sprouts fava bean collard greens dandelion okra wakame tomato. Dandelion cucumber earthnut pea peanut soko zucchini.
+### Creating virtual hosts (part 1)
 
-Turnip greens yarrow ricebean rutabaga endive cauliflower sea lettuce kohlrabi amaranth water spinach avocado daikon napa cabbage asparagus winter purslane kale. Celery potato scallion desert raisin horseradish spinach carrot soko. Lotus root water spinach fennel kombu maize bamboo shoot green bean swiss chard seakale pumpkin onion chickpea gram corn pea. Brussels sprout coriander water chestnut gourd swiss chard wakame kohlrabi beetroot carrot watercress. Corn amaranth salsify bunya nuts nori azuki bean chickweed potato bell pepper artichoke.
+Three playbooks are used to create hosts
+- create-etcd-hosts.yml
+- create-minion-hosts.yml
+- create-master-hosts.yml
 
-See also [additional verbiage](http://veggieipsum.com/)
+Each of these playbooks uses the _clc_provisioning_ role, runs on localhost and
+makes http calls to the CenturyLink Cloud API.
 
+### Provisioning the cluster (parts 2-4)
+
+#### Installing etcd
+
+In part 2, the _kube-up.sh_ script calls a playbook to install etcd.
+
+`ansible-playbook -i hosts-${CLC_CLUSTER_NAME} install_etcd.yml -e ${extra_args}`
+
+
+#### Installing Kubernetes
+
+In part 3, the _kube-up.sh_ script calls a playbook to install kubernetes, with
+differerent configurations for the master and minion nodes.
+
+`ansible-playbook -i hosts-${CLC_CLUSTER_NAME} install_kubernetes.yml -e ${extra_args}`
+
+#### Running Kubernetes applications
+
+In part 4, the _kube-up.sh_ script calls a playbook to deploy some of the standard
+addons
+
+This playbook can be used outside of the sxcript as well to install additional
+applications.  There are templates in the role _kubernetes-manifest_ already
+written for several applications.  These can be applied with the
+_deploy_kube_applications.yml_ playbook (using the ansible json-syntax for
+a command-line list)
+
+```
+app_list='{"k8s_apps":["guestbook-all-in-one","kube-ui"]}
+ansible-playbook -i hosts-${CLC_CLUSTER_NAME}  -e ${app_list}  deploy_kube_applications.yml
+```
