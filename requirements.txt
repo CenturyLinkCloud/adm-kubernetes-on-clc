@@ -1,2 +1,3 @@
-clc-sdk==2.40
-clc-ansible-module
+ansible>=2.0
+clc-sdk>=2.40
+clc-ansible-module>=1.1.2
