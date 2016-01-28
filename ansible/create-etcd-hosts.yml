@@ -20,7 +20,7 @@
     - server_memory: 2
     - server_cpu: 1
     - skip_etcd: False
-    - async_time: 1200
+    - async_time: 7200
     - async_poll: 5
 
   roles:

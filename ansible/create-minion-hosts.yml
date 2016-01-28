@@ -21,7 +21,7 @@
     - server_memory: 4
     - server_cpu: 2
     - skip_minion: False
-    - async_time: 1200
+    - async_time: 7200
     - async_poll: 5
 
   pre_tasks:
@@ -45,7 +45,7 @@
 
     - name: Set Async time differently if type = bareMetal
       set_fact:
-        async_time: 3600
+        async_time: 14400
         async_poll: 10
       when: server_type == "bateMetal"
 

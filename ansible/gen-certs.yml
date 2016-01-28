@@ -13,7 +13,7 @@
 
   vars:
     - clc_cluster_name: k8s_cluster
-    - cert_dir: "{{ clc_cluster_name }}/k8s_certs"
+    - cert_dir: "{{ clc_cluster_name }}.d/k8s_certs"
 
   tasks:
 
@@ -106,11 +106,11 @@
         openssl req
         -new
         -key "{{ cert_dir }}/kubecfg.key"
-        -out "{{ cert_dir }}/kubecfg.csr"
         -subj "/CN=kubecfg"
         -config "{{ cert_dir }}/openssl-client.cnf"
+        -out "{{ cert_dir }}/kubecfg.csr"
       args:
-        creates: "{{ cert_dir }}/openssl-client.cnf"
+        creates: "{{ cert_dir }}/kubecfg.csr"
 
     - name: Generate client cert
       shell: >
@@ -119,12 +119,12 @@
         -CA "{{ cert_dir }}/ca.crt"
         -CAkey "{{ cert_dir }}/ca-key.pem"
         -CAcreateserial
-        -out "{{ cert_dir }}/kubecfg.crt"
         -days 365
         -extensions v3_req
         -extfile "{{ cert_dir }}/openssl-client.cnf"
+        -out "{{ cert_dir }}/kubecfg.crt"
       args:
-        creates:  "{{ cert_dir }}/openssl-client.cnf"
+        creates:  "{{ cert_dir }}/kubecfg.crt"
 
     - name: Read base64 ca cert
       slurp: src="{{ cert_dir }}/ca.crt"
@@ -148,7 +148,7 @@
 
   vars:
     - clc_cluster_name: k8s_cluster
-    - cert_dir: "{{ clc_cluster_name }}/k8s_certs"
+    - cert_dir: "{{ clc_cluster_name }}.d/k8s_certs"
 
   tasks:
 

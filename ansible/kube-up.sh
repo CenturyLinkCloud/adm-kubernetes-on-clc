@@ -113,73 +113,102 @@ case $i in
 esac
 done
 
-if [ -z ${CLC_V2_API_USERNAME:-} ] || [ -z ${CLC_V2_API_PASSWD:-}]
+if [ -z ${CLC_V2_API_USERNAME:-} ] || [ -z ${CLC_V2_API_PASSWD:-} ]
   then
   exit_message 'Environment variables CLC_V2_API_USERNAME, CLC_V2_API_PASSWD must be set'
 fi
 
-echo "Creating Kubernetes Cluster on CenturyLink Cloud"
-echo ""
-
-#echo "cluster_name  = ${cluster_name}"
-#echo "minion_count     = ${minion_count}"
-#echo "server_type    = ${server_type}"
-#echo "etcd_separate_cluster    = ${etcd_separate_cluster}"
-
-# echo "Extra Args   : ${extra_args}"
-# echo "ansible-playbook -i /usr/local/bin/clc_inv.py kubernetes-describe-cluster.yml $extra_args"
-
-#### Part0
-echo "Part0a - Create local sshkey if necessary"
-ansible-playbook create-local-sshkey.yml
-
-echo "Part0b - Create parent group"
-{ ansible-playbook create-parent-group.yml -e "$extra_args"; } &
-wait
-
-
-#### Part1a
-echo "Part1a -  Building out the infrastructure on CLC"
-{ ansible-playbook create-master-hosts.yml -e "$extra_args"; } &
-{ ansible-playbook create-minion-hosts.yml -e "$extra_args"; } &
-if [ -z ${etcd_separate_cluster+x} ]; then
-    echo "ETCD will be installed on master server"
+hosts_file="hosts-$clc_cluster_name"
+if [ -e $hosts_file ]
+then
+  echo "hosts file $hosts_file already exists, skipping host creation"
 else
+
+  echo "Creating Kubernetes Cluster on CenturyLink Cloud"
+  echo ""
+
+  #echo "cluster_name  = ${cluster_name}"
+  #echo "minion_count     = ${minion_count}"
+  #echo "server_type    = ${server_type}"
+  #echo "etcd_separate_cluster    = ${etcd_separate_cluster}"
+
+  # echo "Extra Args   : ${extra_args}"
+  # echo "ansible-playbook -i /usr/local/bin/clc_inv.py kubernetes-describe-cluster.yml $extra_args"
+
+  #### Part0
+  echo "Part0a - Create local sshkey if necessary"
+  ansible-playbook create-local-sshkey.yml
+
+  echo "Part0b - Create parent group"
+  ansible-playbook create-parent-group.yml -e "$extra_args"
+
+  #### Part1a
+  # background these in order to run them in parallel
+  pids=""
+  echo "Part1a -  Building out the infrastructure on CLC"
+  { ansible-playbook create-master-hosts.yml -e "$extra_args"; } &
+  pids="$pids $!"
+  { ansible-playbook create-minion-hosts.yml -e "$extra_args"; } &
+  pids="$pids $!"
+  if [ -z ${etcd_separate_cluster+x} ]; then
+    echo "ETCD will be installed on master server"
+  else
     echo "ETCD will be installed on 3 separate VMs not part of k8s cluster"
     { ansible-playbook create-etcd-hosts.yml -e "$extra_args"; } &
-fi
-wait
+    pids="$pids $!"
+  fi
 
-#### Part1b
-echo "Part1b -  create hosts file"
-{ ansible-playbook create-hosts-file.yml -e "$extra_args"; } &
-wait
+  # -----------------------------------------------------
+  # a _wait_ checkpoint to make sure these CLC hosts were
+  # created safely, exiting if there were problems
+  # -----------------------------------------------------
+  set +e
+  failed=0
+  ps $pids
+  for pid in $pids
+  do
+    wait $pid
+    exit_val=$?
+    if [ $exit_val != 0 ]
+    then
+      echo "process $pid failed with exit value $exit_val"
+      failed=$exit_val
+    fi
+  done
 
+  if [ $failed != 0 ]
+  then
+    exit $failed
+  fi
+  set -e
+  # -----------------------------------------------------
 
+  #### Part1b
+  echo "Part1b -  create hosts file"
+  ansible-playbook create-hosts-file.yml -e "$extra_args"
+
+fi # checking [ -e $hosts_file ]
+
+#### verify access
+ansible -i  hosts-$clc_cluster_name  -m shell -a uptime all
 
 #### Part2
 echo "Part2 - Setting up etcd"
 #install etcd on master or on separate cluster of vms
-{ ansible-playbook -i hosts-$clc_cluster_name install_etcd.yml -e "$extra_args"; } &
-wait
-
+ansible-playbook -i hosts-$clc_cluster_name install_etcd.yml -e "$extra_args"
 
 #### Part3
 echo "Part3 - Setting up kubernetes"
-{ ansible-playbook -i hosts-$clc_cluster_name install_kubernetes.yml -e "$extra_args"; } &
-wait
-
+ansible-playbook -i hosts-$clc_cluster_name install_kubernetes.yml -e "$extra_args"
 
 #### Part4
 echo "Part4 - Installing standard addons"
 standard_addons='{"k8s_apps":["skydns","kube-ui"]}'
-{ ansible-playbook -i hosts-$clc_cluster_name deploy_kube_applications.yml -e ${standard_addons}; } &
-wait
-
+ansible-playbook -i hosts-$clc_cluster_name deploy_kube_applications.yml -e ${standard_addons}
 
 #### Part X - Running test phase and displaying cluster info
 #echo "Starting testing Phase"
-#{ ansible-playbook -i /usr/local/bin/clc_inv.py kubernetes-describe-cluster.yml -e "$extra_args"; } &
+# ansible-playbook -i /usr/local/bin/clc_inv.py kubernetes-describe-cluster.yml -e "$extra_args"
 #wait
 
 

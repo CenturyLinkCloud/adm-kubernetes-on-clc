@@ -11,4 +11,8 @@
   tasks:
 
     - name: concatenate elements
-      assemble: src="{{ ansible_hosts_directory }}" dest="hosts-{{ clc_cluster_name }}" delimiter="\n\n###"
+      assemble:
+        src: "{{ ansible_hosts_directory }}"
+        regexp: "hosts-.*"
+        dest: "hosts-{{ clc_cluster_name }}"
+        delimiter: "\n\n###"
