@@ -10,6 +10,7 @@ subjectAltName = @alt_names
 [alt_names]
 DNS.1 = kubernetes
 DNS.2 = kubernetes.default
+DNS.3 = kubernetes.default.svc
 IP.1 = {{ cluster_k8s_service_vip }}
 {% for host in groups['master'] %}
 {% set offset = loop.index + 1 %}
