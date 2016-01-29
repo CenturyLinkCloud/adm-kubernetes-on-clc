@@ -6,7 +6,7 @@ We choose to use ansible to perform the cluster creation and we have also provid
 
 ## Find Help
 
-If you run into any problems or want help with anything, we are here to help. Simply:
+If you run into any problems or want help with anything, we are here to help. Reach out to use via any of the following ways:
 
 - Submit a github issue
 or
@@ -54,7 +54,10 @@ vi ansible/credentials.sh
 source ansible/credentials.sh
 ```
 
-## Script Installation - Step by step guide on Ubuntu 14:
+#### Installation Requirements and Script on Ubuntu 14:
+
+If you use ubuntu 14, for your convenouce we have provided a step by step guide to install the requirements and install the script.
+
 ```
   # system
   apt-get update
@@ -83,7 +86,7 @@ To create a new Kubernetes cluster, simply run the kube-up.sh script. A complete
 bash kube-up.sh
 ```
 
-### Script Options
+#### Script Options
 ```
 Usage: kube-up.sh [OPTIONS]
 Create servers in the CenturyLinkCloud environment and initialize a Kubernetes cluster
@@ -107,7 +110,7 @@ between option name and option value.
      -etcd_separate_cluster=yes    create a separate cluster of three etcd nodes,
                                    otherwise run etcd on the master node
 ```
-### Script Examples
+#### Script Examples
 
 Create a cluster with name of k8s_1, 1 master node and 3 worker minions (on physical machines), in VA1
 
