@@ -1,13 +1,12 @@
-# Building a Kubernetes cluster on CenturyLink Cloud
+# Kubernetes on CenturyLink Cloud
 
-The repository contains a set of ansible playbooks and roles to automate the
-process of getting a Kubernetes cluster up and running on CenturyLink Cloud.
+These scripts will create a kubernetes cluse on CenturyLink Cloud on top of Virtual Machines or Physical Servers. 
 
-The playbooks can be run by themselves, or with the shell script _kube-up.sh_
+We use ansible to perform the cluster creation and we provide a simple bash wrapper script _kube-up.sh_ to simplify cluster management.  
 
 ## Requirements
 
-- local installation of ansible _version 2.0_ or newer.  If on OSX, try installing with `brew install ansible`
+- local installation of ansible _version 2.0_ or newer.  If on OSX, try installing with `brew install ansible`. 
 - python and pip
 - A CenturyLink Cloud account with rights to create new hosts
 
@@ -122,3 +121,8 @@ a command-line list)
 app_list='{"k8s_apps":["guestbook-all-in-one","kube-ui"]}
 ansible-playbook -i hosts-${CLC_CLUSTER_NAME}  -e ${app_list}  deploy_kube_applications.yml
 ```
+
+
+## License
+
+The project is licensed under the [Apache License v2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
