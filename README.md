@@ -13,19 +13,39 @@ We use ansible to perform the cluster creation and we provide a simple bash wrap
 
 ## Requirements
 
-- local installation of ansible _version 2.0_ or newer.  If on OSX, try installing with `brew install ansible`. 
-- python and pip
+The requirements to run this script are:
+
+- A linux host (tested on ubuntu and OSX)
+- ansible _version 2.0_ or newer.  If on OSX, try installing with `brew install ansible`. 
+- python 
+- pip
+- git
 - A CenturyLink Cloud account with rights to create new hosts
 
-Getting ready:
 
-Clone this repository and cd into it.
-- `sudo pip install -r requirements.txt`
-- `cd ansible`
-- Create the credentials file from the template, and `source credentials.sh`
+## Script Installation
 
+After you have all the requirements met, please follow these instructions to install this script. 
 
-For example, here's a short set of commands for initializing an ansible master on Ubuntu 14:
+1) Clone this repository and cd into it.
+``` 
+git clone https://github.com/CenturyLinkCloud/adm-kubernetes-on-clc 
+```
+
+2) Install the CenturyLink Cloud SDK and Ansible Modules
+```
+sudo pip install -r requirements.txt
+```
+
+3) Create the credentials file from the template and use it to set your ENV variables
+
+``` 
+cp ansible/credentials.sh.template ansible/credentials.sh
+vi ansible/credentials.sh
+source ansible/credentials.sh
+```
+
+## Script Installation - Step by step guide on Ubuntu 14:
 ```
   # system
   apt-get update
@@ -33,14 +53,9 @@ For example, here's a short set of commands for initializing an ansible master o
   curl -O https://bootstrap.pypa.io/get-pip.py
   python get-pip.py
 
-  # git
-  git config --global user.name User.Name
-  git config --global user.email user@example.com
-  git config --global credential.helper cache
-
   # installing this repository
-  mkdir -p /home/development
-  cd /home/development/
+  mkdir -p ~home/k8s-on-clc
+  cd ~home/k8s-on-clc
   git clone https://github.com/CenturyLinkCloud/adm-kubernetes-on-clc.git
   cd adm-kubernetes-on-clc/
   pip install -r requirements.txt
