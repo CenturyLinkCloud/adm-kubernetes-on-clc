@@ -8,7 +8,6 @@ script
     --admission_control=NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota\
     --advertise-address={{ ansible_default_ipv4.address }} \
     --client-ca-file=/srv/kubernetes/ca.crt\
-    --client-ca-file=/srv/kubernetes/ca.crt\
     --etcd-servers={{ etcd_endpoint }}\
     --insecure-bind-address=0.0.0.0\
     --insecure-port=8080\

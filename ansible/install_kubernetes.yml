@@ -38,7 +38,8 @@
     - kubernetes-master
 
 # Provision minion_type
-- hosts: Kubernetes minion
+- name: Kubernetes minion
+  hosts: minion
   vars_files:
     - vars.yml
   pre_tasks:
