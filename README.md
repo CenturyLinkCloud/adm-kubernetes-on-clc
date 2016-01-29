@@ -54,7 +54,7 @@ vi ansible/credentials.sh
 source ansible/credentials.sh
 ```
 
-#### Installation Requirements and Script on Ubuntu 14:
+#### Ubuntu 14  Walkthrough: Installation of Requirements and Scripts
 
 If you use ubuntu 14, for your convenouce we have provided a step by step guide to install the requirements and install the script.
 
@@ -83,6 +83,7 @@ If you use ubuntu 14, for your convenouce we have provided a step by step guide 
 To create a new Kubernetes cluster, simply run the kube-up.sh script. A complete list of script options and some examples are listed below.
 
 ``` 
+cd ./adm-kubernetes-on-clc/ansible
 bash kube-up.sh
 ```
 
@@ -115,18 +116,18 @@ between option name and option value.
 Create a cluster with name of k8s_1, 1 master node and 3 worker minions (on physical machines), in VA1
 
 ```
- ./kube-up.sh --clc_cluster_name=k8s_1 --minion_type=bareMetal --minion_count=3 --datacenter=VA1
+ bash kube-up.sh --clc_cluster_name=k8s_1 --minion_type=bareMetal --minion_count=3 --datacenter=VA1
 ```
 Create a cluster with name of k8s_2, an ha etcd cluster on 3 VMs and 6 worker minions (on VMs), in VA1
 
 ```
- ./kube-up.sh --clc_cluster_name=k8s_2 --minion_type=standard --minion_count=6 --datacenter=VA1 --etcd_separate_cluster=yes
+ bash kube-up.sh --clc_cluster_name=k8s_2 --minion_type=standard --minion_count=6 --datacenter=VA1 --etcd_separate_cluster=yes
 ```
 Create a cluster with name of k8s_3, 1 master node, and 10 worker minions (on VMs) with higher mem/cpu, in UC1:
 
 
 ```
- ./kube-up.sh --clc_cluster_name=k8s_3 --minion_type=standard --minion_count=10 --datacenter=VA1 -mem=6 -cpu=4
+  bash kube-up.sh --clc_cluster_name=k8s_3 --minion_type=standard --minion_count=10 --datacenter=VA1 -mem=6 -cpu=4
 ```
 
 ## Cluster Deletion
