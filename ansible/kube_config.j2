@@ -1,0 +1,20 @@
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: {{ ca_cert_b64 }}
+    server: https://{{ master_ip }}:6443
+  name: {{ cluster_name }}
+contexts:
+- context:
+    cluster: {{ cluster_name }}
+    namespace: {{ namespace }}
+    user: admin/{{ cluster_name }}
+  name: default/{{ cluster_name }}/{{ user_name }}
+current-context: {{ namespace }}/{{ cluster_name }}/{{ user_name }}
+kind: Config
+preferences: {}
+users:
+- name: {{ user_name }}/{{ cluster_name }}
+  user:
+    client-certificate-data: {{ kubecfg_cert_b64 }}
+    client-key-data: {{ kubecfg_key_b64 }}
