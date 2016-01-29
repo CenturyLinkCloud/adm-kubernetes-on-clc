@@ -1,8 +1,15 @@
 # Kubernetes on CenturyLink Cloud
 
-These scripts will create a kubernetes cluse on CenturyLink Cloud on top of Virtual Machines or Physical Servers. 
+These scripts will create a kubernetes cluster on CenturyLink Cloud.  
 
 We use ansible to perform the cluster creation and we provide a simple bash wrapper script _kube-up.sh_ to simplify cluster management.  
+
+## Clusters of VMs or Physical Servers, your choice. 
+
+- We support Kubernetes clusters on both Virtual Machines or Physical Servers. If you want to use physical servers for the worker nodes (minions), simple use the --minion_type=bareMetal flag. 
+- For more information on pyhsical servers, visit: https://www.ctl.io/bare-metal/)
+- Physical serves are only available in the VA1 and GB3 data centers. 
+- VMs are available in all 13 of our public cloud locations
 
 ## Requirements
 
@@ -44,10 +51,9 @@ For example, here's a short set of commands for initializing an ansible master o
   source credentials.sh
 ```
 
-## Bash script instructions
+## Cluster Creation 
 
-The cluster creation uses ansible to create hosts and to install kubernetes.  
-For convenience, a single shell script is used to carry out all of the tasks.
+The cluster creation uses ansible to create hosts and to install kubernetes. For convenience, a single shell script is used to carry out all of the tasks.
 
 ```
 Usage: kube-up.sh [OPTIONS]
@@ -72,12 +78,31 @@ between option name and option value.
      -etcd_separate_cluster=yes    create a separate cluster of three etcd nodes,
                                    otherwise run etcd on the master node
 ```
+### Cluster Creation Examples
 
-For example, to create a cluster with
+- Cluster name k8s_1, 1 master node and 3 worker minions (on physical machines), in VA1
 
 ```
- ./kube-up.sh --clc_cluster_name=k8s_etcd_m6 --minion_type=standard --minion_count=6 --datacenter=VA1 --etcd_separate_cluster=yes
+ ./kube-up.sh --clc_cluster_name=k8s_1 --minion_type=bareMetal --minion_count=3 --datacenter=VA1
 ```
+
+- Cluster name k8s_2, 1 master node, an ha etcd cluster on 3 VMs and 6 worker minions (on VMs), in VA1:
+
+```
+ ./kube-up.sh --clc_cluster_name=k8s_2 --minion_type=standard --minion_count=6 --datacenter=VA1 --etcd_separate_cluster=yes
+```
+
+- Cluster name k8s_3, 1 master node, and 10 worker minions (on VMs) with higher mem/cpu, in UC1:
+
+```
+ ./kube-up.sh --clc_cluster_name=k8s_3 --minion_type=standard --minion_count=10 --datacenter=VA1 -mem=6 -cpu=4
+```
+
+## Cluster Deletion
+
+To delete a cluster, log into the CenturyLink Cloud control portal and delete the parent server group that contains the Kubernetes Cluster. We hope to add a scripted option to do this soon. 
+
+
 ## More about the ansible playbooks
 
 ### Creating virtual hosts (part 1)
@@ -122,6 +147,10 @@ app_list='{"k8s_apps":["guestbook-all-in-one","kube-ui"]}
 ansible-playbook -i hosts-${CLC_CLUSTER_NAME}  -e ${app_list}  deploy_kube_applications.yml
 ```
 
+## What Kubernetes features do not work on CenturyLink Cloud
+
+- At this time, there is no support services of the type 'loadbalancer'. We are actively working on this and hope to publish the changes soon. 
+- At this time, there is no support for persistent storage volumes provided by CenturyLink Cloud. However, customers can bring their pwn persistent storage offering.
 
 ## License
 
