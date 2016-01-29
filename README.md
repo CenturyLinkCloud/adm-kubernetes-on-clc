@@ -103,54 +103,15 @@ between option name and option value.
 To delete a cluster, log into the CenturyLink Cloud control portal and delete the parent server group that contains the Kubernetes Cluster. We hope to add a scripted option to do this soon. 
 
 
-## More about the ansible playbooks
-
-### Creating virtual hosts (part 1)
-
-Three playbooks are used to create hosts
-- create-etcd-hosts.yml
-- create-minion-hosts.yml
-- create-master-hosts.yml
-
-Each of these playbooks uses the _clc_provisioning_ role, runs on localhost and
-makes http calls to the CenturyLink Cloud API.
-
-### Provisioning the cluster (parts 2-4)
-
-#### Installing etcd
-
-In part 2, the _kube-up.sh_ script calls a playbook to install etcd.
-
-`ansible-playbook -i hosts-${CLC_CLUSTER_NAME} install_etcd.yml -e ${extra_args}`
-
-
-#### Installing Kubernetes
-
-In part 3, the _kube-up.sh_ script calls a playbook to install kubernetes, with
-differerent configurations for the master and minion nodes.
-
-`ansible-playbook -i hosts-${CLC_CLUSTER_NAME} install_kubernetes.yml -e ${extra_args}`
-
-#### Running Kubernetes applications
-
-In part 4, the _kube-up.sh_ script calls a playbook to deploy some of the standard
-addons
-
-This playbook can be used outside of the sxcript as well to install additional
-applications.  There are templates in the role _kubernetes-manifest_ already
-written for several applications.  These can be applied with the
-_deploy_kube_applications.yml_ playbook (using the ansible json-syntax for
-a command-line list)
-
-```
-app_list='{"k8s_apps":["guestbook-all-in-one","kube-ui"]}
-ansible-playbook -i hosts-${CLC_CLUSTER_NAME}  -e ${app_list}  deploy_kube_applications.yml
-```
-
 ## What Kubernetes features do not work on CenturyLink Cloud
 
 - At this time, there is no support services of the type 'loadbalancer'. We are actively working on this and hope to publish the changes soon. 
 - At this time, there is no support for persistent storage volumes provided by CenturyLink Cloud. However, customers can bring their pwn persistent storage offering.
+
+## Ansible Files
+
+If you want more information about our ansible files, please [read this file](ansible/README.md)
+
 
 ## License
 
