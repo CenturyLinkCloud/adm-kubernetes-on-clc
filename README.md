@@ -1,8 +1,17 @@
 # Kubernetes on CenturyLink Cloud
 
-These scripts will create a kubernetes cluster on CenturyLink Cloud.  
+This tool handles kubernetes cluster creation on CenturyLink Cloud.  
 
-We use ansible to perform the cluster creation and we provide a simple bash wrapper script _kube-up.sh_ to simplify cluster management.  
+We choose to use ansible to perform the cluster creation and we have also provided a simple bash wrapper script _kube-up.sh_ to simplify cluster management. 
+
+## Find Help
+
+If you run into any problems or want help with anything, we are here to help. Simply:
+
+- Submit a github issue
+or
+- Send an email to kubernetes@ctl.io (registering your email with CenturyLink Cloud will be required)
+
 
 ## Clusters of VMs or Physical Servers, your choice. 
 
@@ -68,8 +77,13 @@ source ansible/credentials.sh
 
 ## Cluster Creation 
 
-The cluster creation uses ansible to create hosts and to install kubernetes. For convenience, a single shell script is used to carry out all of the tasks.
+To create a new Kubernetes cluster, simply run the kube-up.sh script. A complete list of script options and some examples are listed below.
 
+``` 
+bash kube-up.sh
+```
+
+### Script Options
 ```
 Usage: kube-up.sh [OPTIONS]
 Create servers in the CenturyLinkCloud environment and initialize a Kubernetes cluster
@@ -93,21 +107,20 @@ between option name and option value.
      -etcd_separate_cluster=yes    create a separate cluster of three etcd nodes,
                                    otherwise run etcd on the master node
 ```
-### Cluster Creation Examples
+### Script Examples
 
-- Cluster name k8s_1, 1 master node and 3 worker minions (on physical machines), in VA1
+Create a cluster with name of k8s_1, 1 master node and 3 worker minions (on physical machines), in VA1
 
 ```
  ./kube-up.sh --clc_cluster_name=k8s_1 --minion_type=bareMetal --minion_count=3 --datacenter=VA1
 ```
-
-- Cluster name k8s_2, 1 master node, an ha etcd cluster on 3 VMs and 6 worker minions (on VMs), in VA1:
+Create a cluster with name of k8s_2, an ha etcd cluster on 3 VMs and 6 worker minions (on VMs), in VA1
 
 ```
  ./kube-up.sh --clc_cluster_name=k8s_2 --minion_type=standard --minion_count=6 --datacenter=VA1 --etcd_separate_cluster=yes
 ```
+Create a cluster with name of k8s_3, 1 master node, and 10 worker minions (on VMs) with higher mem/cpu, in UC1:
 
-- Cluster name k8s_3, 1 master node, and 10 worker minions (on VMs) with higher mem/cpu, in UC1:
 
 ```
  ./kube-up.sh --clc_cluster_name=k8s_3 --minion_type=standard --minion_count=10 --datacenter=VA1 -mem=6 -cpu=4
