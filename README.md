@@ -30,7 +30,7 @@ The requirements to run this script are:
 - pip
 - git
 - A CenturyLink Cloud account with rights to create new hosts
-
+- An active VPN connection to the centurylink cloud from your linux/ansible host
 
 ## Script Installation
 
