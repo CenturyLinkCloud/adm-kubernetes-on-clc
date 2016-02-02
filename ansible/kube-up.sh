@@ -103,13 +103,13 @@ case $i in
     shift # past argument with no value
     ;;
 
-    --default)
-    DEFAULT=YES
-    shift # past argument with no value
-    ;;
     *)
-            # unknown option
+    echo "Unknown option: $1"
+    echo
+    show_help
+  	exit 1
     ;;
+
 esac
 done
 
