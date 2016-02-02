@@ -32,6 +32,30 @@ kubectl config set-context ${k8s_ns}/${k8s_cluster}/${k8s_user} \
 # apply
 kubectl config use-context ${k8s_ns}/${k8s_cluster}/${k8s_user}
 
+
+echo "# set cluster
+kubectl config set-cluster ${k8s_cluster} \
+   --server https://${master_ip}:6443 \
+   --insecure-skip-tls-verify=false \
+   --embed-certs=true \
+   --certificate-authority=${CLC_CLUSTER_NAME}.d/k8s_certs/ca.crt
+
+# user, credentials (reusing the kubelet/kube-proxy certificate)
+kubectl config set-credentials ${k8s_user}/${k8s_cluster} \
+   --embed-certs=true \
+   --client-certificate=${CLC_CLUSTER_NAME}.d/k8s_certs/kubecfg.crt \
+   --client-key=${CLC_CLUSTER_NAME}.d/k8s_certs/kubecfg.key
+
+# define context
+kubectl config set-context ${k8s_ns}/${k8s_cluster}/${k8s_user} \
+    --user=${k8s_user}/${k8s_cluster} \
+    --namespace=${k8s_ns} \
+    --cluster=${k8s_cluster} \
+
+# apply
+kubectl config use-context ${k8s_ns}/${k8s_cluster}/${k8s_user}
+" >> setup-client.test
+
 # test
 kubectl cluster-info
 
