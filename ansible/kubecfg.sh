@@ -1,10 +1,10 @@
-export CLC_CLUSTER_NAME=k8s_2016-01-28T10-58-17-0800
+export CLC_CLUSTER_NAME=k8s_dev2
 
 export k8s_cluster=thursday
 export k8s_user=admin
 export k8s_ns=default
 
-export master_ip=10.141.117.15
+export master_ip=10.136.191.16
 
 # set default kube config file location to local file kubecfg_${k8s_cluster}
 OLDKUBECONFIG=${KUBECONFIG-~/.kube/config}
