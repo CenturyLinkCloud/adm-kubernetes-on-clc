@@ -1,2 +1,2 @@
-kubernetes_url: https://github.com/kubernetes/kubernetes/releases/download/v1.1.3/kubernetes.tar.gz
-kubernetes_version: kubernetes
+kubernetes_version: v1.1.7
+kubernetes_url: https://github.com/kubernetes/kubernetes/releases/download/{{ kubernetes_version }}/kubernetes.tar.gz
