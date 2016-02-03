@@ -3,3 +3,14 @@ not-tracked/
 # don't put credentials in source control
 certificates/
 credentials.sh
+
+# hosts files
+hosts-*
+
+# openssl residue
+*.crt
+*.cert
+*.pem
+*.key
+*.cnf
+*.csr

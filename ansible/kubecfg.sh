@@ -1,17 +1,34 @@
+#!/usr/bin/env bash
+set -e
+
+
+function exit_message() {
+    echo "ERROR: $1" >&2
+    exit 1
+}
+
 
 if [ -z ${CLC_CLUSTER_NAME+null_if_undefined} ]
-  then echo please define environment variable CLC_CLUSTER_NAME
-  exit 1
+then
+  exit_message "please define environment variable CLC_CLUSTER_NAME"
 fi
 
-if [ -z ${MASTER_IP+null_if_undefined} ]
-  then echo please define environment variable MASTER_IP from hosts-$CLC_CLUSTER_NAME manually
-  exit 1
+if [ ! -d ${CLC_CLUSTER_NAME}.d ]
+then
+  exit_message "directory ${CLC_CLUSTER_NAME}.d does not exist"
+fi
+
+if [ ! -e  hosts-${CLC_CLUSTER_NAME} ]
+then
+  exit_message "ansible file hosts-${CLC_CLUSTER_NAME} does not exist"
 fi
 
 export K8S_CLUSTER=${K8S_CLUSTER-$CLC_CLUSTER_NAME}
 export K8S_USER=${K8S_USER-admin}
 export K8S_NS=${K8S_NS-default}
+
+# extract master ip from hosts file
+export MASTER_IP=$(grep -A1 master hosts-${CLC_CLUSTER_NAME} |  grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b")
 
 # set default kube config file location to local file kubecfg_${K8S_CLUSTER}
 OLDKUBECONFIG=${KUBECONFIG-~/.kube/config}
@@ -67,4 +84,4 @@ EOF
 # test
 kubectl cluster-info
 
-export KUBECONFIG="${KUBECONFIG}:${OLDKUBECONFIG}"
+echo export KUBECONFIG="${KUBECONFIG}:${OLDKUBECONFIG}"
