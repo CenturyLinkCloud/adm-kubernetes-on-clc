@@ -9,7 +9,6 @@
   roles:
     - kubernetes-manifest
 
-
 - name: install elasticsearch master nodes
   hosts: master[0]
   vars:
@@ -52,5 +51,15 @@
     es_is_master_node: true
     es_is_data_node: false
     es_enable_http: true
+  roles:
+    - kubernetes-manifest
+
+- name: install logging services
+  hosts: master[0]
+  vars:
+    k8s_apps:
+      - es-logging-svc
+      - fluentd-es
+      - kibana
   roles:
     - kubernetes-manifest

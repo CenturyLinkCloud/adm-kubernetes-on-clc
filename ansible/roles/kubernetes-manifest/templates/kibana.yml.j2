@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ReplicationController
 metadata:
   name: kibana-logging
-  namespace: default
+  namespace: kube-system
   labels:
     component: kibana-logging
 spec:
@@ -35,9 +35,11 @@ apiVersion: v1
 kind: Service
 metadata:
   name: kibana-logging
-  namespace: default
+  namespace: kube-system
   labels:
-    component: kibana-logging
+      kubernetes.io/cluster-service: "true"
+      kubernetes.io/name: "kibana-logging"
+      component: "kibana-logging"
 spec:
   type: NodePort
   ports:
