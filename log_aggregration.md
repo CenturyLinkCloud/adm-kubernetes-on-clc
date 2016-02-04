@@ -59,7 +59,7 @@ ansible-playbook -i hosts-${CLC_CLUSTER_NAME}  -e k8s_apps=job-es-template deplo
 
 The _fluentd_ pod is run as a DaemonSet so that it runs once and once only on
 each minion node. Container log directories on the node are automatically
-mounted into the _fluentd_ container, and the logs parsed and sent to the 
+mounted into the _fluentd_ container, and the logs parsed and sent to the
 elasticsearch instance at
 http://elasticsearch-logging:9200
 
@@ -67,3 +67,11 @@ http://elasticsearch-logging:9200
 
 _Kibana_ also communicates with http://elasticsearch-logging:9200.  It is exposed as a
 NodePort at port 30056, so the UI can be accessed at http://[ANY_NODE_IP]:30056
+
+Please note, it is _not_ possible to access the kibana UI from the proxy-api.
+Although (a) _cluster-info_ will report something like
+*kibana-logging is running at https://10.141.117.29:6443/api/v1/proxy/namespaces/kube-system/services/kibana-logging*
+and (b) running `kubectl proxy -p 8001` should expose that on localhost without
+need for client certificates, it doesn't work.  Why?  Because kibana is a nodejs
+app and uses redirects to urls like `/apps/kibana` not handled nicely by
+kubernetes proxy-api.
