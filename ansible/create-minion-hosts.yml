@@ -11,7 +11,7 @@
   hosts: localhost
   gather_facts: False
   connection: local
-  # Both vars declrations need to be the same. I have this when hack in place to override sertype for minions only.
+  # Both vars declarations need to be the same. I have this when hack in place to override sertype for minions only.
   vars:
     - clc_cluster_name: k8s
     - ansible_hosts_directory: "{{ clc_cluster_name }}.d"
@@ -29,25 +29,35 @@
       set_fact:
         server_type: "{{ minion_type }}"
       when: minion_type is defined
+
     - name: Check for Minion_count
       set_fact:
         server_count: "{{ minion_count }}"
       when: minion_count is defined
+
     - name: Check for vm_cpu
       set_fact:
         server_cpu: "{{ vm_cpu }}"
       when: vm_cpu is defined
+
     - name: Check for vm_memory
       set_fact:
         server_memory: "{{ vm_memory }}"
       when: vm_memory is defined
 
+    - name: Allocate additional_disks /data space on virtual ("standard") minions
+      set_fact:
+        server_additional_disks:
+          - path: /data
+            sizeGB: 100
+            type: partitioned
+      when: server_type == "standard"
 
     - name: Set Async time differently if type = bareMetal
       set_fact:
         async_time: 14400
         async_poll: 10
-      when: server_type == "bateMetal"
+      when: server_type == "bareMetal"
 
   roles:
     - { role: clc-provisioning, when: skip_minion == False }

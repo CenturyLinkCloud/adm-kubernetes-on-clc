@@ -31,5 +31,14 @@ server_type: standard
 # bareMetal
 server_storage: standard
 
+## mount addition filesystem storage
+## must be left empty for physical servers
+## otherwise could be set wtih:
+##     server_additional_disks:
+##       - path: /data
+##         sizeGB: 100
+##         type: partitioned
+server_additional_disks: []
+
 ## an ansible hosts file will be written to this directory
 ansible_hosts_directory: ./hosts.d
