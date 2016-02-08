@@ -31,7 +31,7 @@
   poll: "{{ async_poll }}"
 #- debug: var=clc_servers
 
-- name: Deploy ssh keys to servers
+- name: Deploy ssh keys to servers in {{ clc_cluster_name }}.{{ server_group }}
   clc_blueprint_package:
     server_ids: "{{ item.name }}"
     package_id: "{{ ssh_key_package_id }}"
@@ -43,10 +43,10 @@
   async: "{{ async_time }}"
   poll: "{{ async_poll }}"
 
-- name: Make sure hosts directory exists
+- name: Make sure local hosts directory exists
   file:
     name: "{{ ansible_hosts_directory }}"
     state: directory
 
-- name: Write hosts file
+- name: Write hosts file for {{ clc_cluster_name }}-{{ server_group }}
   template: src="hosts.j2" dest="{{ ansible_hosts_directory }}/hosts-{{ clc_cluster_name }}-{{ server_group }}"

@@ -118,6 +118,8 @@ if [ -z ${CLC_V2_API_USERNAME:-} ] || [ -z ${CLC_V2_API_PASSWD:-} ]
   exit_message 'Environment variables CLC_V2_API_USERNAME, CLC_V2_API_PASSWD must be set'
 fi
 
+cd ansible
+
 hosts_file="hosts-$clc_cluster_name"
 if [ -e $hosts_file ]
 then
