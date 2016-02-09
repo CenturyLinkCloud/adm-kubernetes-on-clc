@@ -10,10 +10,11 @@ script
 		--cadvisor-port=4194 \
 		--cluster-dns={{ cluster_dns_service_vip }} \
 		--cluster-domain={{ cluster_dns_domain }} \
-		--config="/etc/kubernetes/manifests"
+		--config="/etc/kubernetes/manifests" \
 		--hostname-override={{ ansible_ssh_host }} \
-		--kubeconfig="/var/lib/kubelet/kubeconfig"\
+		--kubeconfig="/var/lib/kubelet/kubeconfig" \
 		--serialize-image-pulls=false\
+		--register-node=true \
 		"
 
 	exec kubelet $KUBELET_OPTS > /var/log/kubelet.log
