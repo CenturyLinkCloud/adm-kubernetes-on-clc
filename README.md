@@ -1,62 +1,55 @@
 # Kubernetes on CenturyLink Cloud
-
 This tool handles kubernetes cluster creation on CenturyLink Cloud.  
 
-We choose to use ansible to perform the cluster creation and we have also provided a simple bash wrapper script _kube-up.sh_ to simplify cluster management. 
+We choose to use ansible to perform the cluster creation and we have also provided a simple bash wrapper script _kube-up.sh_ to simplify cluster management.
 
 ## Find Help
-
 If you run into any problems or want help with anything, we are here to help. Reach out to use via any of the following ways:
-
 - Submit a github issue
-or
+- or
 - Send an email to kubernetes@ctl.io (registering your email with CenturyLink Cloud will be required)
 
-
-## Clusters of VMs or Physical Servers, your choice. 
-
-- We support Kubernetes clusters on both Virtual Machines or Physical Servers. If you want to use physical servers for the worker nodes (minions), simple use the --minion_type=bareMetal flag. 
-- For more information on pyhsical servers, visit: https://www.ctl.io/bare-metal/)
-- Physical serves are only available in the VA1 and GB3 data centers. 
+## Clusters of VMs or Physical Servers, your choice.
+- We support Kubernetes clusters on both Virtual Machines or Physical Servers. If you want to use physical servers for the worker nodes (minions), simple use the --minion_type=bareMetal flag.
+- For more information on pyhsical servers, visit: [https://www.ctl.io/bare-metal/](https://www.ctl.io/bare-metal/))
+- Physical serves are only available in the VA1 and GB3 data centers.
 - VMs are available in all 13 of our public cloud locations
 
 ## Requirements
-
 The requirements to run this script are:
-
 - A linux host (tested on ubuntu and OSX)
-- ansible _version 2.0_ or newer.  If on OSX, try installing with `brew install ansible`. 
-- python 
+- ansible _version 2.0_ or newer.  If on OSX, try installing with `brew install ansible`.
+- python
 - pip
 - git
 - A CenturyLink Cloud account with rights to create new hosts
 - An active VPN connection to the centurylink cloud from your linux/ansible host
 
 ## Script Installation
-
-After you have all the requirements met, please follow these instructions to install this script. 
+After you have all the requirements met, please follow these instructions to install this script.
 
 1) Clone this repository and cd into it.
-``` 
-git clone https://github.com/CenturyLinkCloud/adm-kubernetes-on-clc 
+
+```
+git clone https://github.com/CenturyLinkCloud/adm-kubernetes-on-clc
 ```
 
 2) Install the CenturyLink Cloud SDK and Ansible Modules
+
 ```
 sudo pip install -r requirements.txt
 ```
 
 3) Create the credentials file from the template and use it to set your ENV variables
 
-``` 
+```
 cp ansible/credentials.sh.template ansible/credentials.sh
 vi ansible/credentials.sh
 source ansible/credentials.sh
 ```
 
-#### Ubuntu 14  Walkthrough: Installation of Requirements and Scripts
-
-If you use ubuntu 14, for your convenouce we have provided a step by step guide to install the requirements and install the script.
+### Ubuntu 14 Walkthrough: Installation of Requirements and Scripts
+If you use ubuntu 14, for your convenience we have provided a step by step guide to install the requirements and install the script.
 
 ```
   # system
@@ -78,16 +71,16 @@ If you use ubuntu 14, for your convenouce we have provided a step by step guide 
   source credentials.sh
 ```
 
-## Cluster Creation 
-
+## Cluster Creation
 To create a new Kubernetes cluster, simply run the kube-up.sh script. A complete list of script options and some examples are listed below.
 
-``` 
+```
 cd ./adm-kubernetes-on-clc/ansible
 bash kube-up.sh
 ```
 
-#### Script Options
+### Script Options
+
 ```
 Usage: kube-up.sh [OPTIONS]
 Create servers in the CenturyLinkCloud environment and initialize a Kubernetes cluster
@@ -111,40 +104,74 @@ between option name and option value.
      -etcd_separate_cluster=yes    create a separate cluster of three etcd nodes,
                                    otherwise run etcd on the master node
 ```
-#### Script Examples
 
+### Script Examples
 Create a cluster with name of k8s_1, 1 master node and 3 worker minions (on physical machines), in VA1
 
 ```
  bash kube-up.sh --clc_cluster_name=k8s_1 --minion_type=bareMetal --minion_count=3 --datacenter=VA1
 ```
+
 Create a cluster with name of k8s_2, an ha etcd cluster on 3 VMs and 6 worker minions (on VMs), in VA1
 
 ```
  bash kube-up.sh --clc_cluster_name=k8s_2 --minion_type=standard --minion_count=6 --datacenter=VA1 --etcd_separate_cluster=yes
 ```
-Create a cluster with name of k8s_3, 1 master node, and 10 worker minions (on VMs) with higher mem/cpu, in UC1:
 
+Create a cluster with name of k8s_3, 1 master node, and 10 worker minions (on VMs) with higher mem/cpu, in UC1:
 
 ```
   bash kube-up.sh --clc_cluster_name=k8s_3 --minion_type=standard --minion_count=10 --datacenter=VA1 -mem=6 -cpu=4
 ```
 
 ## Cluster Deletion
+To delete a cluster, log into the CenturyLink Cloud control portal and delete the parent server group that contains the Kubernetes Cluster. We hope to add a scripted option to do this soon.
 
-To delete a cluster, log into the CenturyLink Cloud control portal and delete the parent server group that contains the Kubernetes Cluster. We hope to add a scripted option to do this soon. 
+## Cluster features
+Our default installation installs a number of system utilities
+
+## Cluster management
+
+The most widely used tool for managing a kubernetes cluster is the command-line
+utility _kubectl_.  If you do not already have a copy of this binary on your
+administrative machine, you may run the script _install-kubectl.sh_ which will
+download it and install it in _/usr/bin/local_.
+
+The script requires that the environment variable CLC_CLUSTER_NAME be defined
+
+_install_kubectl.sh_ also writes a configuration file which will embed the necessary
+authentication certificates for the particular cluster.  The configuration file is
+written to the local directory, named *kubectl_${CLC_CLUSTER_NAME}_config*
+
+```
+export KUBECONFIG=kubectl_${CLC_CLUSTER_NAME}_config
+kubectl version
+kubectl cluster-info
+```
+
+### _kubectl_ usage examples
+
+There are a great many features of _kubectl_.  Here are a few examples
+
+The kubernetes api server exposes services on web urls, which are protected by requiring
+client certificates.  If you run a kubectl proxy locally, kubectl will provide
+the necessary certificates and serve locally over http.
+```
+kubectl proxy -p 8001
+```
+and then access urls like http://127.0.0.1:8001/api/v1/proxy/namespaces/kube-system/services/kube-ui/
+without the need for client certificates in your browser.
+
+
+
 
 
 ## What Kubernetes features do not work on CenturyLink Cloud
-
-- At this time, there is no support services of the type 'loadbalancer'. We are actively working on this and hope to publish the changes soon. 
+- At this time, there is no support services of the type 'loadbalancer'. We are actively working on this and hope to publish the changes soon.
 - At this time, there is no support for persistent storage volumes provided by CenturyLink Cloud. However, customers can bring their pwn persistent storage offering.
 
 ## Ansible Files
-
 If you want more information about our ansible files, please [read this file](ansible/README.md)
 
-
 ## License
-
 The project is licensed under the [Apache License v2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
