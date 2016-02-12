@@ -1,1 +1,1 @@
-docker_opts: ""
+docker_opts: " -g /data/var/lib/docker "
