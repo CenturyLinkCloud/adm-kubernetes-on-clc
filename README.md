@@ -125,7 +125,9 @@ Create a cluster with name of k8s_3, 1 master node, and 10 worker minions (on VM
 ```
 
 ## Cluster Deletion
-To delete a cluster, log into the CenturyLink Cloud control portal and delete the parent server group that contains the Kubernetes Cluster. We hope to add a scripted option to do this soon.
+To delete a cluster, log into the CenturyLink Cloud control portal and delete the
+parent server group that contains the Kubernetes Cluster. We hope to add a
+scripted option to do this soon.
 
 ## Cluster features
 Our default installation installs a number of system utilities
@@ -148,6 +150,12 @@ export KUBECONFIG=kubectl_${CLC_CLUSTER_NAME}_config
 kubectl version
 kubectl cluster-info
 ```
+
+### Additional add-ons
+
+Cluster-level log aggregation of pods and containers is not installed by default.
+Please see the additional documentation about [log aggregation](log_aggregation.md)
+for details about our ELK stack deployment.
 
 ### _kubectl_ usage examples
 
