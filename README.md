@@ -75,7 +75,7 @@ If you use ubuntu 14, for your convenience we have provided a step by step guide
 To create a new Kubernetes cluster, simply run the kube-up.sh script. A complete list of script options and some examples are listed below.
 
 ```
-cd ./adm-kubernetes-on-clc/ansible
+cd ./adm-kubernetes-on-clc
 bash kube-up.sh
 ```
 
@@ -154,7 +154,7 @@ kubectl cluster-info
 ### Additional add-ons
 
 Cluster-level log aggregation of pods and containers is not installed by default.
-Please see the additional documentation about [log aggregation](log_aggregation.md)
+Please see the additional documentation about [log aggregation](log_aggregration.md)
 for details about our ELK stack deployment.
 
 ### _kubectl_ usage examples
