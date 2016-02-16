@@ -60,8 +60,8 @@ case $i in
     shift # past argument=value
     ;;
     -c=*|--clc_cluster_name=*)
-    clc_cluster_name="${i#*=}"
-    extra_args="$extra_args clc_cluster_name=$clc_cluster_name"
+    CLC_CLUSTER_NAME="${i#*=}"
+    extra_args="$extra_args clc_cluster_name=$CLC_CLUSTER_NAME"
     shift # past argument=value
     ;;
     -t=*|--minion_type=*)
@@ -118,9 +118,18 @@ if [ -z ${CLC_V2_API_USERNAME:-} ] || [ -z ${CLC_V2_API_PASSWD:-} ]
   exit_message 'Environment variables CLC_V2_API_USERNAME, CLC_V2_API_PASSWD must be set'
 fi
 
+if [ -z ${CLC_CLUSTER_NAME} ]
+  then
+  exit_message 'Cluster name must be set with either command-line argument or as environment variable CLC_CLUSTER_NAME'
+fi
+
 cd ansible
 
-hosts_file="hosts-$clc_cluster_name"
+CLC_CLUSTER_HOME=~/.clc_kube/${CLC_CLUSTER_NAME}
+
+mkdir -p ${CLC_CLUSTER_HOME}/hosts
+hosts_file=${CLC_CLUSTER_HOME}/hosts/inventory
+
 if [ -e $hosts_file ]
 then
   echo "hosts file $hosts_file already exists, skipping host creation"
@@ -139,7 +148,7 @@ else
 
   #### Part0
   echo "Part0a - Create local sshkey if necessary"
-  ansible-playbook create-local-sshkey.yml
+  ansible-playbook create-local-sshkey.yml -e server_cert_store=${CLC_CLUSTER_HOME}/ssh
 
   echo "Part0b - Create parent group"
   ansible-playbook create-parent-group.yml -e "$extra_args"
@@ -192,34 +201,28 @@ else
 fi # checking [ -e $hosts_file ]
 
 #### verify access
-ansible -i  hosts-$clc_cluster_name  -m shell -a uptime all
+ansible -i $hosts_file   -m shell -a uptime all
 
 #### Part2
 echo "Part2 - Setting up etcd"
 #install etcd on master or on separate cluster of vms
-ansible-playbook -i hosts-$clc_cluster_name install_etcd.yml -e "$extra_args"
+ansible-playbook -i $hosts_file  install_etcd.yml -e "$extra_args"
 
 #### Part3
 echo "Part3 - Setting up kubernetes"
-ansible-playbook -i hosts-$clc_cluster_name install_kubernetes.yml -e "$extra_args"
+ansible-playbook -i $hosts_file install_kubernetes.yml -e "$extra_args"
 
 #### Part4
 echo "Part4 - Installing standard addons"
 standard_addons='{"k8s_apps":["skydns","kube-ui","monitoring"]}'
-ansible-playbook -i hosts-$clc_cluster_name deploy_kube_applications.yml -e ${standard_addons}
+ansible-playbook -i $hosts_file deploy_kube_applications.yml -e ${standard_addons}
 
-#### Part X - Running test phase and displaying cluster info
-#echo "Starting testing Phase"
-# ansible-playbook -i /usr/local/bin/clc_inv.py kubernetes-describe-cluster.yml -e "$extra_args"
-#wait
+cat <<MESSAGE
 
+Cluster build is complete. To administer the cluster, install and configure
+kubectl with
 
-
-echo "      Output of 'kubectl cluster-info' on master server"
-echo ""
-#cat /tmp/$cluster_name
-echo ""
-
-echo "All done. Try out your k8 cluster today! -ck"
-echo "> kubectl get nodes"
-echo "> kubectl cluster-info"
+  export CLC_CLUSTER_NAME=$CLC_CLUSTER_NAME
+  ./install-kubectl.sh
+  
+MESSAGE

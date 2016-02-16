@@ -6,15 +6,15 @@
   tasks:
     - fail: msg="This playbook requires Ansible 2.0 or greater (found {{ ansible_version.full }})."
       when: "{{ ansible_version|version_compare(2.0,'<') }}"
+    - fail: msg="The clc_cluster_name variable must be set"
+      when: clc_cluster_name is undefined
 
 - name: Get machine resources for k8s minion
   hosts: localhost
   gather_facts: False
   connection: local
-  # Both vars declarations need to be the same. I have this when hack in place to override sertype for minions only.
+
   vars:
-    - clc_cluster_name: k8s
-    - ansible_hosts_directory: "{{ clc_cluster_name }}.d"
     - server_group: minion
     - datacenter: VA1
     - server_count: 2

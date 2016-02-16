@@ -13,22 +13,31 @@ then
   exit_message "please define environment variable CLC_CLUSTER_NAME"
 fi
 
-if [ ! -d ${CLC_CLUSTER_NAME}.d ]
+CLC_CLUSTER_HOME=${HOME}/.clc_kube/${CLC_CLUSTER_NAME}
+
+if [ ! -d ${CLC_CLUSTER_HOME} ]
 then
-  exit_message "directory ${CLC_CLUSTER_NAME}.d does not exist"
+  exit_message "directory ${CLC_CLUSTER_HOME} does not exist"
 fi
 
-if [ ! -e  hosts-${CLC_CLUSTER_NAME} ]
+HOSTS=${CLC_CLUSTER_HOME}/hosts/inventory
+if [ ! -e  ${HOSTS} ]
 then
-  exit_message "ansible file hosts-${CLC_CLUSTER_NAME} does not exist"
+  exit_message "ansible file ${HOSTS} does not exist"
 fi
 
-export K8S_CLUSTER=${K8S_CLUSTER-$CLC_CLUSTER_NAME}
-export K8S_USER=${K8S_USER-admin}
-export K8S_NS=${K8S_NS-default}
+PKI=${CLC_CLUSTER_HOME}/pki
+if [ ! -d  ${PKI} ]
+then
+  exit_message "public key infrastructure directory ${PKI} does not exist"
+fi
+
+K8S_CLUSTER=${K8S_CLUSTER-$CLC_CLUSTER_NAME}
+K8S_USER=${K8S_USER-admin}
+K8S_NS=${K8S_NS-default}
 
 # extract master ip from hosts file
-export MASTER_IP=$(grep -A1 master hosts-${CLC_CLUSTER_NAME} |  grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b")
+export MASTER_IP=$(grep -A1 master ${HOSTS} | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b")
 
 # set default kube config file location to local file kubecfg_${K8S_CLUSTER}
 OLDKUBECONFIG=${KUBECONFIG-~/.kube/config}
@@ -39,13 +48,13 @@ kubectl config set-cluster ${K8S_CLUSTER} \
    --server https://${MASTER_IP}:6443 \
    --insecure-skip-tls-verify=false \
    --embed-certs=true \
-   --certificate-authority=${CLC_CLUSTER_NAME}.d/k8s_certs/ca.crt
+   --certificate-authority=${PKI}/ca.crt
 
 # user, credentials (reusing the kubelet/kube-proxy certificate)
 kubectl config set-credentials ${K8S_USER}/${K8S_CLUSTER} \
    --embed-certs=true \
-   --client-certificate=${CLC_CLUSTER_NAME}.d/k8s_certs/kubecfg.crt \
-   --client-key=${CLC_CLUSTER_NAME}.d/k8s_certs/kubecfg.key
+   --client-certificate= ${PKI}/kubecfg.crt \
+   --client-key= ${PKI}/kubecfg.key
 
 # define context
 kubectl config set-context ${K8S_NS}/${K8S_CLUSTER}/${K8S_USER} \
@@ -63,13 +72,13 @@ kubectl config set-cluster ${k8s_cluster} \
    --server https://${MASTER_IP}:6443 \
    --insecure-skip-tls-verify=false \
    --embed-certs=true \
-   --certificate-authority=${CLC_CLUSTER_NAME}.d/k8s_certs/ca.crt
+   --certificate-authority=${PKI}/ca.crt
 
 # user, credentials (reusing the kubelet/kube-proxy certificate)
 kubectl config set-credentials ${k8s_user}/${k8s_cluster} \
    --embed-certs=true \
-   --client-certificate=${CLC_CLUSTER_NAME}.d/k8s_certs/kubecfg.crt \
-   --client-key=${CLC_CLUSTER_NAME}.d/k8s_certs/kubecfg.key
+   --client-certificate=${PKI}/kubecfg.crt \
+   --client-key=${PKI}/kubecfg.key
 
 # define context
 kubectl config set-context ${k8s_ns}/${k8s_cluster}/${k8s_user} \
