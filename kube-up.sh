@@ -224,5 +224,5 @@ kubectl with
 
   export CLC_CLUSTER_NAME=$CLC_CLUSTER_NAME
   ./install-kubectl.sh
-  
+
 MESSAGE

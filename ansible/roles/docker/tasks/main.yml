@@ -17,17 +17,18 @@
 
 - name: Update installed packages to latest version.
   apt:
-    update_cache: "yes"
-    upgrade: "yes"
+    update_cache: True
+    upgrade: True
 
 # Pin this to version 1.9 due to some issues (probably minor...) with 1.10
 - name: Install docker package.
   apt:
     name: docker-engine=1.9.1-0~trusty
+    force: True
     state: present
 
 - name: Enable docker service on startup.
   service:
     name: docker
-    enabled: "yes"
+    enabled: True
     state: started

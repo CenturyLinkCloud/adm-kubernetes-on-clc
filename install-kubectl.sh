@@ -50,12 +50,13 @@ $KUBECTL version -c
 ### configuring kubectl
 set -e
 
-export K8S_CLUSTER=${K8S_CLUSTER-$CLC_CLUSTER_NAME}
-export K8S_USER=${K8S_USER-admin}
-export K8S_NS=${K8S_NS-default}
+K8S_CLUSTER=${K8S_CLUSTER-$CLC_CLUSTER_NAME}
+K8S_USER=${K8S_USER-admin}
+K8S_NS=${K8S_NS-default}
 
 # extract master ip from hosts file
-export MASTER_IP=$(grep -A1 master ${HOSTS} | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b")
+MASTER_IP=$(grep -A1 master ${HOSTS} | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b")
+SECURE_PORT=6443
 
 # set default kube config file location to local file kubecfg_${K8S_CLUSTER}
 OLDKUBECONFIG=${KUBECONFIG-~/.kube/config}
@@ -79,10 +80,13 @@ kubectl config set-credentials ${K8S_USER}/${K8S_CLUSTER} \
 kubectl config set-context ${K8S_NS}/${K8S_CLUSTER}/${K8S_USER} \
     --user=${K8S_USER}/${K8S_CLUSTER} \
     --namespace=${K8S_NS} \
-    --cluster=${K8S_CLUSTER} \
+    --cluster=${K8S_CLUSTER}
+
+# use context
+kubectl config use-context ${K8S_NS}/${K8S_CLUSTER}/${K8S_USER}
 
 # test
-KUBECONFIG= kubectl cluster-info
+kubectl --kubeconfig=${KUBECONFIG} cluster-info
 
 cat << MESSAGE >&1
 in order to use kubectl to talk to the cluster, set the

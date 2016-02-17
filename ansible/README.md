@@ -1,7 +1,7 @@
 
 ## More about the ansible playbooks
 
-For those interested in the ansible files themselves, here is a little more information about them. 
+For those interested in the ansible files themselves, here is a little more information about them.
 
 ### Creating virtual hosts (part 1)
 
@@ -34,7 +34,7 @@ differerent configurations for the master and minion nodes.
 In part 4, the _kube-up.sh_ script calls a playbook to deploy some of the standard
 addons
 
-This playbook can be used outside of the sxcript as well to install additional
+This playbook can be used outside of the script as well to install additional
 applications.  There are templates in the role _kubernetes-manifest_ already
 written for several applications.  These can be applied with the
 _deploy_kube_applications.yml_ playbook (using the ansible json-syntax for

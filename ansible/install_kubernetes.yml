@@ -13,7 +13,7 @@
         etcd_endpoint: "{% for host in groups[etcd_group] %}http://{{ hostvars[host]['ansible_default_ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
 
 # Certificates are generated locally, copied out to master and minion
-- include: gen-certs.yml
+- include: gen_certs.yml
 
 # Provision  master
 - name: Kubernetes Master

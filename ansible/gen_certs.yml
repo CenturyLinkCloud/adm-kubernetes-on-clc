@@ -27,12 +27,12 @@
 
     - name: Template openssl configuration (server)
       template:
-        src: openssl.cnf.j2
+        src: pki/openssl.cnf.j2
         dest: "{{ cert_dir }}/openssl.cnf"
 
     - name: Template openssl configuration (client)
       template:
-        src: openssl-client.cnf.j2
+        src: pki/openssl-client.cnf.j2
         dest: "{{ cert_dir }}/openssl-client.cnf"
 
     - name: Generate CA key
@@ -56,9 +56,6 @@
         -out "{{ cert_dir }}/ca.crt"
       args:
         creates: "{{ cert_dir }}/ca.crt"
-
-    #- debug: var=hostvars[item]['ansible_default_ipv4']
-    #  with_items: groups['master']
 
     - name: Generate server key
       shell: >
