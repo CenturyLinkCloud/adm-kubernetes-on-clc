@@ -14,3 +14,28 @@
 
   roles:
     - etcd
+
+
+- name: write etcd configuration information into local config files
+  hosts: localhost
+
+  tasks:
+
+    - debug: var=etcd_group
+
+    - name: etcd_endpoint -> master config
+      lineinfile:
+        dest: "~/.clc_kube/{{ clc_cluster_name }}/config/master_config.yml"
+        line: "etcd_endpoint: {{ hostvars[ item ].etcd_endpoint }}"
+        state: present
+        regexp: "^etcd_endpoint:"
+      with_items: groups[ etcd_group ][0]
+
+
+    - name: etcd_endpoint -> minion config
+      lineinfile:
+        dest: "~/.clc_kube/{{ clc_cluster_name }}/config/minion_config.yml"
+        line: "etcd_endpoint: {{ hostvars[ item ].etcd_endpoint }}"
+        state: present
+        regexp: "^etcd_endpoint:"
+      with_items: groups[ etcd_group ][0]

@@ -50,7 +50,15 @@ function exit_message() {
     exit 1
 }
 
-extra_args="from_bash=true"
+# default values before reading the command-line args
+datacenter=VA1
+server_count=2
+server_config_id=default
+vm_memory=4
+vm_cpu=2
+skip_minion=False
+async_time=7200
+async_poll=5
 
 for i in "$@"
 do
@@ -123,13 +131,14 @@ if [ -z ${CLC_CLUSTER_NAME} ]
   exit_message 'Cluster name must be set with either command-line argument or as environment variable CLC_CLUSTER_NAME'
 fi
 
-cd ansible
 
 CLC_CLUSTER_HOME=~/.clc_kube/${CLC_CLUSTER_NAME}
 
 mkdir -p ${CLC_CLUSTER_HOME}/hosts
+mkdir -p ${CLC_CLUSTER_HOME}/config
 hosts_file=${CLC_CLUSTER_HOME}/hosts/inventory
 
+cd ansible
 if [ -e $hosts_file ]
 then
   echo "hosts file $hosts_file already exists, skipping host creation"
@@ -138,29 +147,55 @@ else
   echo "Creating Kubernetes Cluster on CenturyLink Cloud"
   echo ""
 
-  #echo "cluster_name  = ${cluster_name}"
-  #echo "minion_count     = ${minion_count}"
-  #echo "server_type    = ${server_type}"
-  #echo "etcd_separate_cluster    = ${etcd_separate_cluster}"
+  cat <<CONFIG > ${CLC_CLUSTER_HOME}/config/master_config.yml
+clc_cluster_name: ${CLC_CLUSTER_NAME}
+server_group: master
+datacenter: ${datacenter}
+server_count: 1
+server_config_id: default
+server_memory: 4
+server_cpu: 2
+skip_minion: True
+async_time: 7200
+async_poll: 5
+CONFIG
 
-  # echo "Extra Args   : ${extra_args}"
-  # echo "ansible-playbook -i /usr/local/bin/clc_inv.py kubernetes-describe-cluster.yml $extra_args"
+  cat <<CONFIG > ${CLC_CLUSTER_HOME}/config/minion_config.yml
+clc_cluster_name: ${CLC_CLUSTER_NAME}
+server_group: minion
+datacenter: ${datacenter}
+server_count: ${minion_count}
+server_config_id: ?????
+server_memory: ${vm_memory}
+server_cpu: ${vm_cpu}
+skip_minion: False
+async_time: 7200
+async_poll: 5
+CONFIG
 
   #### Part0
   echo "Part0a - Create local sshkey if necessary"
   ansible-playbook create-local-sshkey.yml -e server_cert_store=${CLC_CLUSTER_HOME}/ssh
 
   echo "Part0b - Create parent group"
-  ansible-playbook create-parent-group.yml -e "$extra_args"
+  ansible-playbook create-parent-group.yml -e config_vars=${CLC_CLUSTER_HOME}/config/master_config.yml
 
   #### Part1a
+  echo "Part1a -  Building out the infrastructure on CLC"
+
   # background these in order to run them in parallel
   pids=""
-  echo "Part1a -  Building out the infrastructure on CLC"
-  { ansible-playbook create-master-hosts.yml -e "$extra_args"; } &
+
+  { ansible-playbook create-master-hosts.yml \
+      -e config_vars=${CLC_CLUSTER_HOME}/config/master_config.yml
+  } &
   pids="$pids $!"
-  { ansible-playbook create-minion-hosts.yml -e "$extra_args"; } &
+
+  { ansible-playbook create-minion-hosts.yml \
+      -e config_vars=${CLC_CLUSTER_HOME}/config/minion_config.yml
+  } &
   pids="$pids $!"
+
   if [ -z ${etcd_separate_cluster+x} ]; then
     echo "ETCD will be installed on master server"
   else
@@ -201,21 +236,21 @@ else
 fi # checking [ -e $hosts_file ]
 
 #### verify access
-ansible -i $hosts_file   -m shell -a uptime all
+ansible -i ${CLC_CLUSTER_HOME}/hosts   -m shell -a uptime all
 
 #### Part2
 echo "Part2 - Setting up etcd"
 #install etcd on master or on separate cluster of vms
-ansible-playbook -i $hosts_file  install_etcd.yml -e "$extra_args"
+ansible-playbook -i ${CLC_CLUSTER_HOME}/hosts  install_etcd.yml -e "$extra_args"
 
 #### Part3
 echo "Part3 - Setting up kubernetes"
-ansible-playbook -i $hosts_file install_kubernetes.yml -e "$extra_args"
+ansible-playbook -i ${CLC_CLUSTER_HOME}/hosts install_kubernetes.yml -e "$extra_args"
 
 #### Part4
 echo "Part4 - Installing standard addons"
 standard_addons='{"k8s_apps":["skydns","kube-ui","monitoring"]}'
-ansible-playbook -i $hosts_file deploy_kube_applications.yml -e ${standard_addons}
+ansible-playbook -i ${CLC_CLUSTER_HOME}/hosts deploy_kube_applications.yml -e ${standard_addons}
 
 cat <<MESSAGE
 

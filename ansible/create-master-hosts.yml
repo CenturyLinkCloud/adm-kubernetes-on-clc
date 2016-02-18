@@ -6,13 +6,13 @@
   tasks:
     - fail: msg="This playbook requires Ansible 2.0 or greater (found {{ ansible_version.full }})."
       when: "{{ ansible_version|version_compare(2.0,'<') }}"
-    - fail: msg="The clc_cluster_name variable must be set"
-      when: clc_cluster_name is undefined
 
 - name: Get machine resources for k8s master
   hosts: localhost
   gather_facts: False
   connection: local
+
+  # playbook default variable definitions
   vars:
     - server_group: master
     - datacenter: VA1
@@ -22,5 +22,11 @@
     - skip_master: False
     - async_time: 7200
     - async_poll: 5
+
+  pre_tasks:
+    - name: include vars for master configuration
+      include_vars: "{{ config_vars }}"
+      when: config_vars is defined
+
   roles:
     - { role: clc-provisioning, when: skip_master == False }

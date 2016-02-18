@@ -1,17 +1,15 @@
 ---
 - name: Check ansible version
   hosts: localhost0
-  gather_facts: False
+  gather_facts: True
   connection: local
   tasks:
     - fail: msg="This playbook requires Ansible 2.0 or greater (found {{ ansible_version.full }})."
       when: "{{ ansible_version|version_compare(2.0,'<') }}"
-    - fail: msg="The clc_cluster_name variable must be set"
-      when: clc_cluster_name is undefined
 
 - name: Get machine resources for k8s minion
   hosts: localhost
-  gather_facts: False
+  gather_facts: True
   connection: local
 
   vars:
@@ -25,6 +23,10 @@
     - async_poll: 5
 
   pre_tasks:
+    - name: include vars for configuration
+      include_vars: "{{ config_vars }}"
+      when: config_vars is defined
+
     - name: Check for Minion_type
       set_fact:
         server_type: "{{ minion_type }}"
