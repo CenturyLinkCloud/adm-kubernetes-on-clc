@@ -48,7 +48,7 @@
     es_cluster_name: es_in_k8s
     es_role: client
     es_replica_count: 2
-    es_is_master_node: true
+    es_is_master_node: false
     es_is_data_node: false
     es_enable_http: true
   roles:

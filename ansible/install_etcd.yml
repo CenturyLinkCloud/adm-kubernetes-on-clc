@@ -1,4 +1,5 @@
 ---
+
 - name: "Install etcd on group {{ etcd_group }}"
   hosts: "{{ etcd_group }}"
   gather_facts: True
@@ -18,10 +19,10 @@
 
 - name: write etcd configuration information into local config files
   hosts: localhost
+  vars_files:
+    - vars.yml
 
   tasks:
-
-    - debug: var=etcd_group
 
     - name: etcd_endpoint -> master config
       lineinfile:
@@ -30,7 +31,6 @@
         state: present
         regexp: "^etcd_endpoint:"
       with_items: groups[ etcd_group ][0]
-
 
     - name: etcd_endpoint -> minion config
       lineinfile:

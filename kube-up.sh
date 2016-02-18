@@ -175,10 +175,12 @@ CONFIG
 
   #### Part0
   echo "Part0a - Create local sshkey if necessary"
-  ansible-playbook create-local-sshkey.yml -e server_cert_store=${CLC_CLUSTER_HOME}/ssh
+  ansible-playbook create-local-sshkey.yml \
+     -e server_cert_store=${CLC_CLUSTER_HOME}/ssh
 
   echo "Part0b - Create parent group"
-  ansible-playbook create-parent-group.yml -e config_vars=${CLC_CLUSTER_HOME}/config/master_config.yml
+  ansible-playbook create-parent-group.yml \
+      -e config_vars=${CLC_CLUSTER_HOME}/config/master_config.yml
 
   #### Part1a
   echo "Part1a -  Building out the infrastructure on CLC"
@@ -241,16 +243,21 @@ ansible -i ${CLC_CLUSTER_HOME}/hosts   -m shell -a uptime all
 #### Part2
 echo "Part2 - Setting up etcd"
 #install etcd on master or on separate cluster of vms
-ansible-playbook -i ${CLC_CLUSTER_HOME}/hosts  install_etcd.yml -e "$extra_args"
+ansible-playbook -i ${CLC_CLUSTER_HOME}/hosts  install_etcd.yml  \
+    -e config_vars=${CLC_CLUSTER_HOME}/config/master_config.yml \
+    -e "$extra_args"
 
 #### Part3
 echo "Part3 - Setting up kubernetes"
-ansible-playbook -i ${CLC_CLUSTER_HOME}/hosts install_kubernetes.yml -e "$extra_args"
+ansible-playbook -i ${CLC_CLUSTER_HOME}/hosts install_kubernetes.yml  \
+    -e config_vars=${CLC_CLUSTER_HOME}/config/master_config.yml \
+    -e "$extra_args"
 
 #### Part4
 echo "Part4 - Installing standard addons"
 standard_addons='{"k8s_apps":["skydns","kube-ui","monitoring"]}'
-ansible-playbook -i ${CLC_CLUSTER_HOME}/hosts deploy_kube_applications.yml -e ${standard_addons}
+ansible-playbook -i ${CLC_CLUSTER_HOME}/hosts deploy_kube_applications.yml \
+     -e ${standard_addons}
 
 cat <<MESSAGE
 
