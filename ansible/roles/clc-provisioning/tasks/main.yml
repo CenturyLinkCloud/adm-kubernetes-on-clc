@@ -21,11 +21,12 @@
     os_type:  "{{ server_physical_os }}"
     exact_count: "{{ server_count }}"
     count_group: "{{ clc_cluster_name }}.{{ server_group }}"
+    group: "{{ clc_cluster_name }}.{{ server_group }}"
     cpu: "{{ server_cpu }}"
     memory: "{{ server_memory }}"
     type: "{{ server_type }}"
     storage_type: "{{ server_storage }}"
-    configuration_id: "{{ server_config_id }}"
+    configuration_id: "{{ physical_config[server_config_id] }}"
     additional_disks: "{{ server_additional_disks }}"
   register: clc_servers_initial
   async: "{{ async_time }}"

@@ -64,11 +64,14 @@ CLC_CLUSTER_HOME=~/.clc_kube/${CLC_CLUSTER_NAME}
 hosts_dir=${CLC_CLUSTER_HOME}/hosts/
 config_dir=${CLC_CLUSTER_HOME}/config/
 
+if [ ! -d ${config_dir} ]
+  then
+  exit_message "Configuration directory ${config_dir} not found"
+fi
+
 cd ansible
 
-# bleah need to manage the fact that this is an _additional node_ and so
-# _exact_count_ and _count_group_ must not be set, while _count_ and _group_ *are* set
-
+# set the _add_nodes_ variable
 ansible-playbook create-minion-hosts.yml \
   -e add_nodes=1 \
   -e minion_count=$minion_count \

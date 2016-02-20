@@ -36,10 +36,10 @@ not take arguments
      -m= (--minion_count=)         number of kubernetes minion nodes
      -mem= (--vm_memory=)          number of GB ram for each minion
      -cpu= (--vm_cpu=)             number of virtual cps for each minion node
-     -phyid= (--server_conf_id=)   physical server configuration id, one of
-                                      physical_server_20_core_conf_id
-                                      physical_server_12_core_conf_id
-                                      physical_server_4_core_conf_id (default)
+     -phyid= (--server_config_id=)   physical server configuration id, one of
+                                      physical_server_20_core
+                                      physical_server_12_core
+                                      physical_server_4_core (default)
      --etcd_separate_cluster       create a separate cluster of three etcd nodes,
                                    otherwise run etcd on the master node
 EOF
@@ -53,6 +53,7 @@ function exit_message() {
 # default values before reading the command-line args
 datacenter=VA1
 server_count=2
+minion_type=standard
 server_config_id=default
 vm_memory=4
 vm_cpu=2
@@ -70,11 +71,6 @@ case $i in
     -c=*|--clc_cluster_name=*)
     CLC_CLUSTER_NAME="${i#*=}"
     extra_args="$extra_args clc_cluster_name=$CLC_CLUSTER_NAME"
-    shift # past argument=value
-    ;;
-    -t=*|--minion_type=*)
-    minion_type="${i#*=}"
-    extra_args="$extra_args minion_type=$minion_type"
     shift # past argument=value
     ;;
     -d=*|--datacenter=*)
@@ -98,9 +94,14 @@ case $i in
     shift # past argument=value
     ;;
 
-    -phyid=*|--server_conf_id=*)
-    server_conf_id="${i#*=}"
-    extra_args="$extra_args server_config_id=$server_conf_id"
+    -t=*|--minion_type=*)
+    minion_type="${i#*=}"
+    extra_args="$extra_args minion_type=$minion_type"
+    shift # past argument=value
+    ;;
+    -phyid=*|--server_config_id=*)
+    server_config_id="${i#*=}"
+    extra_args="$extra_args server_config_id=$server_config_id"
     shift # past argument=value
     ;;
 
@@ -130,6 +131,24 @@ if [ -z ${CLC_CLUSTER_NAME} ]
   then
   exit_message 'Cluster name must be set with either command-line argument or as environment variable CLC_CLUSTER_NAME'
 fi
+
+if [[  ${minion_type} == "standard" ]]
+then
+  if [[ ${server_config_id} != "default"  ]]
+  then
+    exit_message "Server configuration of \"${server_config_id}\" is not compatible with ${minion_type} VM, use \"default\""
+  fi
+elif [[  ${minion_type} == "bareMetal" ]]
+then
+  if [[ ${server_config_id} == "default"  ]]
+  then
+    true # do nothing, validate internally in ansible
+  fi
+else
+  exit_message "Minion type \"${minion_type}\" unknown"
+fi
+
+
 
 
 CLC_CLUSTER_HOME=~/.clc_kube/${CLC_CLUSTER_NAME}
@@ -165,13 +184,16 @@ clc_cluster_name: ${CLC_CLUSTER_NAME}
 server_group: minion
 datacenter: ${datacenter}
 server_count: ${minion_count}
-server_config_id: ?????
+minion_type: ${minion_type}
+server_config_id: ${server_config_id}
 server_memory: ${vm_memory}
 server_cpu: ${vm_cpu}
 skip_minion: False
 async_time: 7200
 async_poll: 5
 CONFIG
+
+
 
   #### Part0
   echo "Part0a - Create local sshkey if necessary"
@@ -189,12 +211,12 @@ CONFIG
   pids=""
 
   { ansible-playbook create-master-hosts.yml \
-      -e config_vars=${CLC_CLUSTER_HOME}/config/master_config.yml
+      -e config_vars=${CLC_CLUSTER_HOME}/config/master_config.yml;
   } &
   pids="$pids $!"
 
   { ansible-playbook create-minion-hosts.yml \
-      -e config_vars=${CLC_CLUSTER_HOME}/config/minion_config.yml
+      -e config_vars=${CLC_CLUSTER_HOME}/config/minion_config.yml;
   } &
   pids="$pids $!"
 
@@ -202,7 +224,9 @@ CONFIG
     echo "ETCD will be installed on master server"
   else
     echo "ETCD will be installed on 3 separate VMs not part of k8s cluster"
-    { ansible-playbook create-etcd-hosts.yml -e "$extra_args"; } &
+    { ansible-playbook create-etcd-hosts.yml  \
+        -e config_vars=${CLC_CLUSTER_HOME}/config/master_config.yml;
+    } &
     pids="$pids $!"
   fi
 
@@ -244,14 +268,12 @@ ansible -i ${CLC_CLUSTER_HOME}/hosts   -m shell -a uptime all
 echo "Part2 - Setting up etcd"
 #install etcd on master or on separate cluster of vms
 ansible-playbook -i ${CLC_CLUSTER_HOME}/hosts  install_etcd.yml  \
-    -e config_vars=${CLC_CLUSTER_HOME}/config/master_config.yml \
-    -e "$extra_args"
+    -e config_vars=${CLC_CLUSTER_HOME}/config/master_config.yml
 
 #### Part3
 echo "Part3 - Setting up kubernetes"
 ansible-playbook -i ${CLC_CLUSTER_HOME}/hosts install_kubernetes.yml  \
-    -e config_vars=${CLC_CLUSTER_HOME}/config/master_config.yml \
-    -e "$extra_args"
+    -e config_vars=${CLC_CLUSTER_HOME}/config/master_config.yml
 
 #### Part4
 echo "Part4 - Installing standard addons"
