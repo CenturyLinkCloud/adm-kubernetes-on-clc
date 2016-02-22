@@ -1,6 +1,6 @@
 ---
 - name: Check ansible version
-  hosts: localhost0
+  hosts: localhost
   gather_facts: False
   connection: local
   tasks:
@@ -9,12 +9,10 @@
 
 - name: Get machine resources for k8s minion
   hosts: localhost
-  gather_facts: False
+  gather_facts: True
   connection: local
-  # Both vars declarations need to be the same. I have this when hack in place to override sertype for minions only.
+
   vars:
-    - clc_cluster_name: k8s
-    - ansible_hosts_directory: "{{ clc_cluster_name }}.d"
     - server_group: minion
     - datacenter: VA1
     - server_count: 2
@@ -25,6 +23,10 @@
     - async_poll: 5
 
   pre_tasks:
+    - name: include vars for configuration
+      include_vars: "{{ config_vars }}"
+      when: config_vars is defined
+
     - name: Check for Minion_type
       set_fact:
         server_type: "{{ minion_type }}"

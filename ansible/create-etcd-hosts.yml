@@ -1,19 +1,19 @@
 ---
 - name: Check ansible version
-  hosts: localhost0
+  hosts: localhost
   gather_facts: False
   connection: local
   tasks:
     - fail: msg="This playbook requires Ansible 2.0 or greater (found {{ ansible_version.full }})."
       when: "{{ ansible_version|version_compare(2.0,'<') }}"
+    - fail: msg="The clc_cluster_name variable must be set"
+      when: clc_cluster_name is undefined
 
 - name: Get machine resources for etcd
   hosts: localhost
   gather_facts: False
   connection: local
   vars:
-    - clc_cluster_name: k8s
-    - ansible_hosts_directory: "{{ clc_cluster_name }}.d"
     - server_group: etcd
     - datacenter: VA1
     - server_count: 3

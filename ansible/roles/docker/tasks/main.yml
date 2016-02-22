@@ -24,6 +24,7 @@
 - name: Install docker package.
   apt:
     name: docker-engine=1.9.1-0~trusty
+    force: "yes"
     state: present
 
 - name: Enable docker service on startup.

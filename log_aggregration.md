@@ -12,7 +12,8 @@ To install, you should have an ansible hosts file that was created when the clus
 was made.
 ```
 cd ansible
-ansible-playbook -i hosts-${CLC_CLUSTER_NAME} install_log_aggregation.yml
+hosts_dir=~/.clc_kube/${CLC_CLUSTER_NAME}/hosts/
+ansible-playbook -i ${hosts_dir} install_log_aggregation.yml
 ```
 
 ### Elasticsearch

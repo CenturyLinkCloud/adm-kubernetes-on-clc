@@ -11,7 +11,7 @@ If you run into any problems or want help with anything, we are here to help. Re
 
 ## Clusters of VMs or Physical Servers, your choice.
 - We support Kubernetes clusters on both Virtual Machines or Physical Servers. If you want to use physical servers for the worker nodes (minions), simple use the --minion_type=bareMetal flag.
-- For more information on pyhsical servers, visit: [https://www.ctl.io/bare-metal/](https://www.ctl.io/bare-metal/))
+- For more information on physical servers, visit: [https://www.ctl.io/bare-metal/](https://www.ctl.io/bare-metal/))
 - Physical serves are only available in the VA1 and GB3 data centers.
 - VMs are available in all 13 of our public cloud locations
 
@@ -76,7 +76,7 @@ To create a new Kubernetes cluster, simply run the kube-up.sh script. A complete
 
 ```
 cd ./adm-kubernetes-on-clc
-bash kube-up.sh
+bash kube-up.sh -c="name_of_kubernetes_cluster"
 ```
 
 ### Script Options
@@ -161,6 +161,16 @@ for details about our ELK stack deployment.
 
 There are a great many features of _kubectl_.  Here are a few examples
 
+List existing nodes, pods, services and more, in all namespaces, or in just one
+```
+kubectl get nodes
+
+kubectl get --all-namespaces services
+
+kubectl get --namespace=kube-system replicationcontrollers
+
+```
+
 The kubernetes api server exposes services on web urls, which are protected by requiring
 client certificates.  If you run a kubectl proxy locally, kubectl will provide
 the necessary certificates and serve locally over http.
@@ -169,9 +179,6 @@ kubectl proxy -p 8001
 ```
 and then access urls like http://127.0.0.1:8001/api/v1/proxy/namespaces/kube-system/services/kube-ui/
 without the need for client certificates in your browser.
-
-
-
 
 
 ## What Kubernetes features do not work on CenturyLink Cloud

@@ -1,19 +1,7 @@
 ---
 
-# Collect IP addresses for etcd
-- name: Collect Facts
-  hosts: all
-  gather_facts: True
-  vars_files:
-    - vars.yml
-
-  tasks:
-    - name: Set etcd url for cluster in group "{{ etcd_group }}"
-      set_fact:
-        etcd_endpoint: "{% for host in groups[etcd_group] %}http://{{ hostvars[host]['ansible_default_ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
-
 # Certificates are generated locally, copied out to master and minion
-- include: gen-certs.yml
+- include: gen_certs.yml
 
 # Provision  master
 - name: Kubernetes Master
@@ -27,6 +15,13 @@
   pre_tasks:
     - name: set master ip address
       set_fact: master_ip={{ ansible_default_ipv4.address }}
+    - name: Set etcd url for cluster in group "{{ etcd_group }}"
+      set_fact:
+        etcd_endpoint: "{% for host in groups[etcd_group] %}http://{{ hostvars[host]['ansible_default_ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
+    - name: include vars for master configuration
+      include_vars: "{{ config_vars }}"
+      when: config_vars is defined
+
   roles:
     - resolv
     - etcd
@@ -37,15 +32,41 @@
     - kubernetes-node
     - kubernetes-master
 
+- name: Save master configuration information to minion_config
+  hosts: localhost
+
+  tasks:
+
+    - debug: var=groups["master"]
+
+    - name: master_ip -> minion config
+      lineinfile:
+        dest: "~/.clc_kube/{{ clc_cluster_name }}/config/minion_config.yml"
+        line: "master_ip: {{ hostvars[ item ].ansible_default_ipv4.address  }}"
+        state: present
+        regexp: "^master_ip:"
+      with_items: groups["master"][0]
+
+
 # Provision minion_type
 - name: Kubernetes minion
   hosts: minion
   vars_files:
     - vars.yml
   pre_tasks:
-    # TODO - set_fact: apiserver_endpoint=https://{{ hostvars[ item ].ansible_default_ipv4.address }}:6443
-    - set_fact: apiserver_endpoint=http://{{ hostvars[ item ].ansible_default_ipv4.address }}:8080
+
+    - name: include vars for minion configuration
+      include_vars: "{{ config_vars }}"
+      when: config_vars is defined
+
+    - set_fact:
+        master_ip: "{{ hostvars[ item ].ansible_default_ipv4.address }}"
       with_items: groups['master'][0]
+      when: master_ip is not defined
+
+    # TODO - set_fact: apiserver_endpoint=https://{{ master_ip }}:6443
+    - set_fact:
+        apiserver_endpoint: "http://{{ master_ip }}:8080"
 
   roles:
     - resolv

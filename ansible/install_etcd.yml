@@ -1,4 +1,5 @@
 ---
+
 - name: "Install etcd on group {{ etcd_group }}"
   hosts: "{{ etcd_group }}"
   gather_facts: True
@@ -14,3 +15,32 @@
 
   roles:
     - etcd
+
+
+- name: write etcd configuration information into local config files
+  hosts: localhost
+  vars_files:
+    - vars.yml
+
+  pre_tasks:
+    - name: include vars from master configuration
+      include_vars: "{{ config_vars }}"
+      when: config_vars is defined
+
+  tasks:
+
+    - name: etcd_endpoint -> master config
+      lineinfile:
+        dest: "~/.clc_kube/{{ clc_cluster_name }}/config/master_config.yml"
+        line: "etcd_endpoint: {{ hostvars[ item ].etcd_endpoint }}"
+        state: present
+        regexp: "^etcd_endpoint:"
+      with_items: groups[ etcd_group ][0]
+
+    - name: etcd_endpoint -> minion config
+      lineinfile:
+        dest: "~/.clc_kube/{{ clc_cluster_name }}/config/minion_config.yml"
+        line: "etcd_endpoint: {{ hostvars[ item ].etcd_endpoint }}"
+        state: present
+        regexp: "^etcd_endpoint:"
+      with_items: groups[ etcd_group ][0]

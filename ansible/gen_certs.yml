@@ -2,6 +2,14 @@
 - hosts: all
   gather_facts: True
 
+  pre_tasks:
+    - name: include vars for minion configuration
+      include_vars: "{{ config_vars }}"
+      when: config_vars is defined
+
+  tasks:
+    - fail: msg="The clc_cluster_name variable must be set"
+      when: clc_cluster_name is undefined
 
 - name: Create certificate authority and certs on localhost
   hosts: localhost
@@ -12,8 +20,13 @@
     - vars.yml
 
   vars:
-    - clc_cluster_name: k8s_cluster
-    - cert_dir: "{{ clc_cluster_name }}.d/k8s_certs"
+    - clc_cluster_home: "{{ lookup('env','HOME') }}/.clc_kube/{{ clc_cluster_name }}"
+    - cert_dir: "{{ clc_cluster_home }}/pki"
+
+  pre_tasks:
+    - name: include vars from master configuration
+      include_vars: "{{ config_vars }}"
+      when: config_vars is defined
 
   tasks:
 
@@ -24,12 +37,12 @@
 
     - name: Template openssl configuration (server)
       template:
-        src: openssl.cnf.j2
+        src: pki/openssl.cnf.j2
         dest: "{{ cert_dir }}/openssl.cnf"
 
     - name: Template openssl configuration (client)
       template:
-        src: openssl-client.cnf.j2
+        src: pki/openssl-client.cnf.j2
         dest: "{{ cert_dir }}/openssl-client.cnf"
 
     - name: Generate CA key
@@ -53,10 +66,6 @@
         -out "{{ cert_dir }}/ca.crt"
       args:
         creates: "{{ cert_dir }}/ca.crt"
-
-
-    #- debug: var=hostvars[item]['ansible_default_ipv4']
-    #  with_items: groups['master']
 
     - name: Generate server key
       shell: >
@@ -126,29 +135,14 @@
       args:
         creates:  "{{ cert_dir }}/kubecfg.crt"
 
-    - name: Read base64 ca cert
-      slurp: src="{{ cert_dir }}/ca.crt"
-      register: ca_cert
-      run_once: true
-
-    - name: Read base64 client key
-      slurp: src="{{ cert_dir }}/kubecfg.key"
-      register: kubecfg_key
-      run_once: true
-
-    - name: Read base64 client cert
-      slurp: src="{{ cert_dir }}/kubecfg.crt"
-      register: kubecfg_crt
-      run_once: true
-
 
 - name: Copy certificates to master
   hosts:
   - master
 
   vars:
-    - clc_cluster_name: k8s_cluster
-    - cert_dir: "{{ clc_cluster_name }}.d/k8s_certs"
+    - clc_cluster_home: "{{ lookup('env','HOME') }}/.clc_kube/{{ clc_cluster_name }}"
+    - cert_dir: "{{ clc_cluster_home }}/pki"
 
   tasks:
 
@@ -168,14 +162,20 @@
 
 
 - name: Copy configuration to minion
-  hosts:
-  - minion
+  hosts: minion
+
+  vars:
+    - clc_cluster_home: "{{ lookup('env','HOME') }}/.clc_kube/{{ clc_cluster_name }}"
+    - cert_dir: "{{ clc_cluster_home }}/pki"
+    - ca_cert_b64: "{{ lookup('file', cert_dir+'/ca.crt') | b64encode }}"
+    - kubecfg_cert_b64: "{{ lookup('file', cert_dir+'/kubecfg.crt') | b64encode }}"
+    - kubecfg_key_b64: "{{ lookup('file', cert_dir+'/kubecfg.key') | b64encode }}"
 
   tasks:
 
-    - set_fact: ca_cert_b64="{{ hostvars['localhost']['ca_cert']['content'] }}"
-    - set_fact: kubecfg_cert_b64="{{ hostvars['localhost']['kubecfg_crt']['content'] }}"
-    - set_fact: kubecfg_key_b64="{{ hostvars['localhost']['kubecfg_key']['content'] }}"
+    #- debug: var=ca_cert_b64
+    #- debug: var=kubecfg_cert_b64
+    #- debug: var=kubecfg_key_b64
 
     - name: Create kubelet/kube-proxy config directory
       file:

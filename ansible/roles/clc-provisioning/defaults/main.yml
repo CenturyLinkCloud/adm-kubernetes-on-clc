@@ -5,7 +5,7 @@
 # server_group:   // a group name for these servers, also used by CLC in generating the hostname
 # datacenter:     // desired datacenter location, VA1, WA1, etc
 
-clc_cluster_name: "clc-cluster"
+clc_cluster_home: "{{ lookup('env','HOME') }}/.clc_kube/{{ clc_cluster_name }}"
 
 ## default to ubuntu
 server_vm_template: "ubuntu-14-64"
@@ -16,7 +16,7 @@ server_physical_os: "ubuntu14_64Bit"
 server_config_id: "{{ default_config_id }}"
 
 ## directory in which to create or use ssh keys
-server_cert_store: "./certificates"
+server_cert_store: "{{ clc_cluster_home }}/ssh"
 
 ## number of servers
 server_count: 1
@@ -40,5 +40,8 @@ server_storage: standard
 ##         type: partitioned
 server_additional_disks: []
 
-## an ansible hosts file will be written to this directory
-ansible_hosts_directory: ./hosts.d
+## etcd is dployed to the master group unless otherwise specified
+etcd_group: master
+
+## an ansible inventory file will be written to this directory
+ansible_hosts_directory: "{{ clc_cluster_home }}/hosts"
