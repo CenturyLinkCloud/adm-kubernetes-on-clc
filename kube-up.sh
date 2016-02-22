@@ -31,15 +31,16 @@ not take arguments
 
      -h (--help)                   display this help and exit
      -c= (--clc_cluster_name=)     set the name of the cluster, as used in CLC group names
-     -t= (--minion_type=)          standard -> VM (default), bareMetal -> physical]
      -d= (--datacenter=)           VA1 (default)
      -m= (--minion_count=)         number of kubernetes minion nodes
      -mem= (--vm_memory=)          number of GB ram for each minion
      -cpu= (--vm_cpu=)             number of virtual cps for each minion node
-     -phyid= (--server_config_id=)   physical server configuration id, one of
+     -t= (--minion_type=)          standard -> VM (default), bareMetal -> physical]
+     -phyid= (--server_config_id=) if obtaining a bareMetal server, this configuration id
+                                   must be set to one of:
                                       physical_server_20_core
                                       physical_server_12_core
-                                      physical_server_4_core (default)
+                                      physical_server_4_core
      --etcd_separate_cluster       create a separate cluster of three etcd nodes,
                                    otherwise run etcd on the master node
 EOF
@@ -70,45 +71,37 @@ case $i in
     ;;
     -c=*|--clc_cluster_name=*)
     CLC_CLUSTER_NAME="${i#*=}"
-    extra_args="$extra_args clc_cluster_name=$CLC_CLUSTER_NAME"
     shift # past argument=value
     ;;
     -d=*|--datacenter=*)
     datacenter="${i#*=}"
-    extra_args="$extra_args datacenter=$datacenter"
     shift # past argument=value
     ;;
     -m=*|--minion_count=*)
     minion_count="${i#*=}"
-    extra_args="$extra_args minion_count=$minion_count"
     shift # past argument=value
     ;;
     -mem=*|--vm_memory=*)
     vm_memory="${i#*=}"
-    extra_args="$extra_args vm_memory=$vm_memory"
     shift # past argument=value
     ;;
     -cpu=*|--vm_cpu=*)
     vm_cpu="${i#*=}"
-    extra_args="$extra_args vm_cpu=$vm_cpu"
     shift # past argument=value
     ;;
 
     -t=*|--minion_type=*)
     minion_type="${i#*=}"
-    extra_args="$extra_args minion_type=$minion_type"
     shift # past argument=value
     ;;
     -phyid=*|--server_config_id=*)
     server_config_id="${i#*=}"
-    extra_args="$extra_args server_config_id=$server_config_id"
     shift # past argument=value
     ;;
 
     --etcd_separate_cluster*)
     # the ansible variable "etcd_group" has default value "master"
     etcd_separate_cluster=yes
-    extra_args="$extra_args etcd_group=etcd"
     shift # past argument with no value
     ;;
 
@@ -140,10 +133,7 @@ then
   fi
 elif [[  ${minion_type} == "bareMetal" ]]
 then
-  if [[ ${server_config_id} == "default"  ]]
-  then
     true # do nothing, validate internally in ansible
-  fi
 else
   exit_message "Minion type \"${minion_type}\" unknown"
 fi
@@ -155,12 +145,12 @@ CLC_CLUSTER_HOME=~/.clc_kube/${CLC_CLUSTER_NAME}
 
 mkdir -p ${CLC_CLUSTER_HOME}/hosts
 mkdir -p ${CLC_CLUSTER_HOME}/config
-hosts_file=${CLC_CLUSTER_HOME}/hosts/inventory
+created_flag=${CLC_CLUSTER_HOME}/created_on
 
 cd ansible
-if [ -e $hosts_file ]
+if [ -e $created_flag ]
 then
-  echo "hosts file $hosts_file already exists, skipping host creation"
+  echo "cluster file $created_flag already exists, skipping host creation"
 else
 
   echo "Creating Kubernetes Cluster on CenturyLink Cloud"
@@ -255,9 +245,8 @@ CONFIG
   set -e
   # -----------------------------------------------------
 
-  #### Part1b
-  echo "Part1b -  create hosts file"
-  ansible-playbook create-hosts-file.yml -e "$extra_args"
+  # write timestamp into flag file
+  date +%Y-%m-%dT%H-%M-%S%z > $created_flag
 
 fi # checking [ -e $hosts_file ]
 
@@ -267,7 +256,7 @@ ansible -i ${CLC_CLUSTER_HOME}/hosts   -m shell -a uptime all
 #### Part2
 echo "Part2 - Setting up etcd"
 #install etcd on master or on separate cluster of vms
-ansible-playbook -i ${CLC_CLUSTER_HOME}/hosts  install_etcd.yml  \
+ansible-playbook -vvv -i ${CLC_CLUSTER_HOME}/hosts  install_etcd.yml  \
     -e config_vars=${CLC_CLUSTER_HOME}/config/master_config.yml
 
 #### Part3

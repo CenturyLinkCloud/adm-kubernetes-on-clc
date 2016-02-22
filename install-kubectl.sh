@@ -17,10 +17,10 @@ then
   exit_message "cluster config directory ${CLC_CLUSTER_HOME} does not exist"
 fi
 
-HOSTS=${CLC_CLUSTER_HOME}/hosts/inventory
-if [ ! -e  ${HOSTS} ]
+HOSTS=${CLC_CLUSTER_HOME}/hosts
+if [ ! -d  ${HOSTS} ]
 then
-  exit_message "ansible file ${HOSTS} does not exist"
+  exit_message "ansible hosts directory ${HOSTS} does not exist"
 fi
 
 PKI=${CLC_CLUSTER_HOME}/pki
@@ -55,7 +55,7 @@ K8S_USER=${K8S_USER-admin}
 K8S_NS=${K8S_NS-default}
 
 # extract master ip from hosts file
-MASTER_IP=$(grep -A1 master ${HOSTS} | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b")
+MASTER_IP=$(grep -A1 master ${HOSTS}/hosts-* | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b")
 SECURE_PORT=6443
 
 # set default kube config file location to local file kubecfg_${K8S_CLUSTER}
@@ -92,6 +92,6 @@ cat << MESSAGE >&1
 in order to use kubectl to talk to the cluster, set the
 environment variable KUBECONFIG with
 
-   export KUBECONFIG="${KUBECONFIG}:${OLDKUBECONFIG}"
+   export KUBECONFIG="${KUBECONFIG}"
 
 MESSAGE

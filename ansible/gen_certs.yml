@@ -23,6 +23,11 @@
     - clc_cluster_home: "{{ lookup('env','HOME') }}/.clc_kube/{{ clc_cluster_name }}"
     - cert_dir: "{{ clc_cluster_home }}/pki"
 
+  pre_tasks:
+    - name: include vars from master configuration
+      include_vars: "{{ config_vars }}"
+      when: config_vars is defined
+
   tasks:
 
     - name: Create certificate directory
