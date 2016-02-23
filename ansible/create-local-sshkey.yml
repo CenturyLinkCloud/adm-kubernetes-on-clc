@@ -4,9 +4,5 @@
   gather_facts: False
   connection: local
 
-  ## default value
-  #  vars:
-  #    - server_cert_store : ./certificates
-
   roles:
     - local-sshkey

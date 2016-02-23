@@ -124,6 +124,17 @@ Create a cluster with name of k8s_3, 1 master node, and 10 worker minions (on VM
   bash kube-up.sh --clc_cluster_name=k8s_3 --minion_type=standard --minion_count=10 --datacenter=VA1 -mem=6 -cpu=4
 ```
 
+### Configuration files
+
+Various configuration files are written into the home directory under
+_.clc_kube/${CLC_CLUSTER_NAME}_ in several subdirectories
+
+* _config/_: ansible variable files containing parameters describing the master and minion hosts
+* _hosts/_: hosts files listing access information for the ansible playbooks
+* _kube/_: kubectl configuration files, and the basic-authentication password for admin access to the kubernetes api
+* _pki/_: public key infrastructure files enabling TLS communication in the cluster
+* _ssh/_: ssh keys for root access to the hosts
+
 ## Cluster Deletion
 To delete a cluster, log into the CenturyLink Cloud control portal and delete the
 parent server group that contains the Kubernetes Cluster. We hope to add a
@@ -150,6 +161,25 @@ export KUBECONFIG=kubectl_${CLC_CLUSTER_NAME}_config
 kubectl version
 kubectl cluster-info
 ```
+
+### Accessing the cluster programmatically
+
+It's possible to use the locally-stored client certificates to access the api server
+```
+curl \
+   --cacert ${CLC_CLUSTER_HOME}/pki/ca.crt  \
+   --key ${CLC_CLUSTER_HOME}/pki/kubecfg.key \
+   --cert ${CLC_CLUSTER_HOME}/pki/kubecfg.crt  https://${MASTER_IP}:6443
+```
+But please note, this *does not* work out of the box with the curl binary
+distributed with OSX
+
+### Accessing the cluster with a browser
+
+The cluster is set up to use basic authentication for the user _admin_.  
+Hitting the url at https://${MASTER_IP}:6443 will require accepting the self-
+signed certificate from the apiserver, and then presenting the admin password
+found at _${CLC_CLUSTER_HOME}/kube/admin_password.txt_
 
 ### Additional add-ons
 
@@ -190,4 +220,3 @@ If you want more information about our ansible files, please [read this file](an
 
 ## License
 The project is licensed under the [Apache License v2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
-
