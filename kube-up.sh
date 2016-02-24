@@ -53,7 +53,7 @@ function exit_message() {
 
 # default values before reading the command-line args
 datacenter=VA1
-server_count=2
+minion_count=2
 minion_type=standard
 server_config_id=default
 vm_memory=4
