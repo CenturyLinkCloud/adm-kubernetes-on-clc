@@ -1,5 +1,7 @@
 - name: Install required packages.
-  apt: name={{ item }} state=present
+  apt:
+    name: "{{ item }}"
+    state: present
   with_items:
     - bridge-utils
 
@@ -26,13 +28,16 @@
 - name: Shutdown the existing docker bridge interface.
   command: ip link set dev docker0 down
   ignore_errors: yes
-  
+
 - name: Remove the existing docker bridge interface.
   command: brctl delbr docker0
   ignore_errors: yes
-  
+
 - name: Update docker with flannel configuration.
-  lineinfile: dest=/etc/default/docker regexp='^DOCKER_OPTS' line='DOCKER_OPTS="-H tcp://127.0.0.1:4243 -H unix:///var/run/docker.sock --bip={{ flannel_subnet }} --mtu={{ flannel_mtu }} {{ docker_opts }}"'
-    
+  lineinfile:
+    dest: /etc/default/docker
+    regexp: '^DOCKER_OPTS'
+    line: 'DOCKER_OPTS="-H tcp://127.0.0.1:4243 -H unix:///var/run/docker.sock --bip={{ flannel_subnet }} --mtu={{ flannel_mtu }} {{ docker_opts }}"'
+
 - name: Start the docker service.
   command: start docker

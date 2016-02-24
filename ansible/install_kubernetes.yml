@@ -1,19 +1,52 @@
 ---
+- name: Gather facts on all hosts in cluster
+  hosts: all
+  gather_facts: True
 
-# Certificates are generated locally, copied out to master and minion
-- include: gen_certs.yml
+- name: prepare PKI credentials
+  hosts: localhost
+  gather_facts: False
 
-# Provision  master
-- name: Kubernetes Master
+  vars_files:
+    - vars.yml
+
+  vars:
+    - clc_cluster_home: "{{ lookup('env','HOME') }}/.clc_kube/{{ clc_cluster_name }}"
+    - cert_dir: "{{ clc_cluster_home }}/pki"
+
+  pre_tasks:
+    - name: include vars for master configuration
+      include_vars: "{{ config_vars }}"
+      when: config_vars is defined
+
+  roles:
+
+    - role: k8s_certificates
+      create_ca: True
+      create_server: True
+      cert_client: kubecfg
+
+    - role: k8s_certificates
+      cert_client: kubectl
+
+
+- name: Provision kubernetes Master
   hosts: master
   gather_facts: True
   vars_files:
     - vars.yml
   vars:
-    # TODO - apiserver_endpoint: https://{{ ansible_default_ipv4.address }}:6443
-    - apiserver_endpoint: http://{{ ansible_default_ipv4.address }}:8080
+    - apiserver_endpoint: https://{{ ansible_default_ipv4.address }}:6443
+
     - clc_cluster_home: "{{ lookup('env','HOME') }}/.clc_kube/{{ clc_cluster_name }}"
     - kube_config_local: "{{ clc_cluster_home }}/kube"
+    - cert_dir: "{{ clc_cluster_home }}/pki"
+
+    - ca_cert_b64: "{{ lookup('file', cert_dir+'/ca.crt') | b64encode }}"
+    - server_cert_b64: "{{ lookup('file', cert_dir+'/server.crt') | b64encode }}"
+    - server_key_b64: "{{ lookup('file', cert_dir+'/server.key') | b64encode }}"
+    - kubecfg_cert_b64: "{{ lookup('file', cert_dir+'/kubecfg.crt') | b64encode }}"
+    - kubecfg_key_b64: "{{ lookup('file', cert_dir+'/kubecfg.key') | b64encode }}"
 
   pre_tasks:
     - name: set master ip address
@@ -51,8 +84,7 @@
       with_items: groups["master"][0]
 
 
-# Provision minion_type
-- name: Kubernetes minion
+- name: Provision kubernetes minion
   hosts: minion
 
   vars_files:
@@ -60,6 +92,11 @@
 
   vars:
     - clc_cluster_home: "{{ lookup('env','HOME') }}/.clc_kube/{{ clc_cluster_name }}"
+    - cert_dir: "{{ clc_cluster_home }}/pki"
+
+    - ca_cert_b64: "{{ lookup('file', cert_dir+'/ca.crt') | b64encode }}"
+    - kubecfg_cert_b64: "{{ lookup('file', cert_dir+'/kubecfg.crt') | b64encode }}"
+    - kubecfg_key_b64: "{{ lookup('file', cert_dir+'/kubecfg.key') | b64encode }}"
 
   pre_tasks:
 
@@ -72,9 +109,8 @@
       with_items: groups['master'][0]
       when: master_ip is not defined
 
-    # TODO - set_fact: apiserver_endpoint=https://{{ master_ip }}:6443
     - set_fact:
-        apiserver_endpoint: "http://{{ master_ip }}:8080"
+        apiserver_endpoint: "https://{{ master_ip }}:6443"
 
   roles:
     - resolv

@@ -20,7 +20,7 @@ class ClcMiniApi(object):
             headers['authorization'] = "Bearer " + self.bearerToken
         return headers
 
-    def __init__(self, username, password:
+    def __init__(self, username, password):
         self.authentication = {}
         self.authentication['username'] = username
         self.authentication['password'] = password

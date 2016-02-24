@@ -27,13 +27,13 @@
   - name: create /var/etcd/
     file: path=/var/etcd state=directory
 
-  - name: clear datadir
-    file: path="{{ etcd_data_dir }}" state=absent
+  #- name: clear datadir
+  #  file: path="{{ etcd_data_dir }}" state=absent
 
   - name: restore datadir
     file: path="{{ etcd_data_dir }}" state=directory
 
   - name: restart service
-    service: name=etcd state=restarted
+    service: name=etcd state=running
 
   when: "{{ etcd_install_and_run_service }}"

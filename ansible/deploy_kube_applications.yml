@@ -15,7 +15,7 @@
   vars_files:
     - vars.yml
   vars:
-    - apiserver_endpoint: http://{{ ansible_default_ipv4.address }}:8080
+    - apiserver_endpoint: https://{{ ansible_default_ipv4.address }}:6443
   pre_tasks:
     - name: set master ip address
       set_fact: ip_address={{ ansible_default_ipv4.address }}

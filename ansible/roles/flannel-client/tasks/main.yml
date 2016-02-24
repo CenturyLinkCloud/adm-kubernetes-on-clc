@@ -1,8 +1,10 @@
 - name: Add flanneld service configuration.
-  template: src=flanneld.conf.j2 dest=/etc/init/flanneld.conf
-
-- name: Enable flanneld service.
-  service: name=flanneld enabled=yes
+  template:
+    src: flanneld.conf.j2
+    dest: /etc/init/flanneld.conf
 
 - name: Start flanneld service.
-  service: name=flanneld state=restarted
+  service:
+    name: flanneld
+    state: running
+    enabled: True

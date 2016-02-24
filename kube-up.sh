@@ -26,7 +26,7 @@ Environment variables CLC_V2_API_USERNAME and CLC_V2_API_PASSWD must be set in
 order to access the CenturyLinkCloud API
 
 Most options (both short and long form) require arguments, and must include "="
-between option name and option value.  _--help_ and _--etcd_separate_cluster_ do
+between option name and option value. _--help_ and _--etcd_separate_cluster_ do
 not take arguments
 
      -h (--help)                   display this help and exit
@@ -125,13 +125,13 @@ if [ -z ${CLC_CLUSTER_NAME} ]
   exit_message 'Cluster name must be set with either command-line argument or as environment variable CLC_CLUSTER_NAME'
 fi
 
-if [[  ${minion_type} == "standard" ]]
+if [[ ${minion_type} == "standard" ]]
 then
-  if [[ ${server_config_id} != "default"  ]]
+  if [[ ${server_config_id} != "default" ]]
   then
     exit_message "Server configuration of \"${server_config_id}\" is not compatible with ${minion_type} VM, use \"default\""
   fi
-elif [[  ${minion_type} == "bareMetal" ]]
+elif [[ ${minion_type} == "bareMetal" ]]
 then
     true # do nothing, validate internally in ansible
 else
@@ -195,7 +195,7 @@ CONFIG
       -e config_vars=${CLC_CLUSTER_HOME}/config/master_config.yml
 
   #### Part1a
-  echo "Part1a -  Building out the infrastructure on CLC"
+  echo "Part1a - Building out the infrastructure on CLC"
 
   # background these in order to run them in parallel
   pids=""
@@ -251,17 +251,17 @@ CONFIG
 fi # checking [ -e $hosts_file ]
 
 #### verify access
-ansible -i ${CLC_CLUSTER_HOME}/hosts   -m shell -a uptime all
+ansible -i ${CLC_CLUSTER_HOME}/hosts -m shell -a uptime all
 
 #### Part2
 echo "Part2 - Setting up etcd"
 #install etcd on master or on separate cluster of vms
-ansible-playbook -vvv -i ${CLC_CLUSTER_HOME}/hosts  install_etcd.yml  \
+ansible-playbook -i ${CLC_CLUSTER_HOME}/hosts install_etcd.yml \
     -e config_vars=${CLC_CLUSTER_HOME}/config/master_config.yml
 
 #### Part3
 echo "Part3 - Setting up kubernetes"
-ansible-playbook -i ${CLC_CLUSTER_HOME}/hosts install_kubernetes.yml  \
+ansible-playbook -i ${CLC_CLUSTER_HOME}/hosts install_kubernetes.yml \
     -e config_vars=${CLC_CLUSTER_HOME}/config/master_config.yml
 
 #### Part4
