@@ -95,7 +95,7 @@ if __name__=="__main__":
     import os
     import shutil
 
-    parser = argparse.ArgumentParser(description='Delete a CLC Kubernetes group')
+    parser = argparse.ArgumentParser(description='Delete a CLC Kubernetes group and all of its configuration')
     parser.add_argument('--cluster', dest='clc_cluster_name', required=1)
     parser.add_argument('--datacenter', dest='datacenter', required=1)
 
@@ -108,7 +108,11 @@ if __name__=="__main__":
         print "Unable to read CLC username and password from environment variables"
         exit(1)
 
-    print "Running this script will permanently delete cluster \""+args.clc_cluster_name+ "\". Continue? [Yn]"
+    local_config = os.environ["HOME"] + "/.clc_kube/" + args.clc_cluster_name
+
+    print "Running this script will permanently delete cluster \""+args.clc_cluster_name+ "\""
+    print "and all local configuration files " +local_config 
+    print "Continue? [Yn]"
     response=raw_input()
 
     if response != 'Y':
@@ -125,5 +129,4 @@ if __name__=="__main__":
     else:
         print "No group found for "+args.clc_cluster_name+" in datacenter " + args.datacenter
 
-    local_config = os.environ["HOME"] + "/.clc_kube/" + args.clc_cluster_name
     shutil.rmtree(local_config)

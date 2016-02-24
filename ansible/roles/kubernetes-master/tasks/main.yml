@@ -28,6 +28,11 @@
     src: basic-auth.j2
     dest: /srv/kubernetes/password
 
+- name: Template kubeconfig with certificate data
+  template:
+    src: kubeconfig.j2
+    dest: /srv/kubernetes/kubeconfig
+
 - name: Start kube-apiserver service.
   service:
     name: kube-apiserver
@@ -45,11 +50,6 @@
     state: running
     enabled: True
 
-- name: Template kubeconfig with certificate data
-  template:
-    src: kubeconfig.j2
-    dest: /srv/kubernetes/kubeconfig
-
 - name: Add kube-scheduler service configuration.
   template:
     src: kube-scheduler.conf.j2
@@ -60,6 +60,3 @@
     name: kube-scheduler
     state: running
     enabled: True
-
-- name: Install httplib2.
-  apt: name=python-httplib2 state=present

@@ -278,4 +278,7 @@ kubectl with
   export CLC_CLUSTER_NAME=$CLC_CLUSTER_NAME
   ./install-kubectl.sh
 
+If accessing the cluster services with a browser, the basic-authentication password
+for the admin user is found in ${CLC_CLUSTER_HOME}/kube/admin_password.txt
+
 MESSAGE
