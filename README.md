@@ -1,7 +1,7 @@
 # Kubernetes on CenturyLink Cloud
-This tool handles kubernetes cluster creation on CenturyLink Cloud.  
+These scripts handle the creation, deletion and expansion of kubernetes clusters on CenturyLink Cloud. 
 
-We choose to use ansible to perform the cluster creation and we have also provided a simple bash wrapper script _kube-up.sh_ to simplify cluster management.
+You can accomplish all these tasks with a simple single command. And, for those interested, we use Ansible to perform these tasks. 
 
 ## Find Help
 If you run into any problems or want help with anything, we are here to help. Reach out to use via any of the following ways:
@@ -48,7 +48,7 @@ vi ansible/credentials.sh
 source ansible/credentials.sh
 ```
 
-### Ubuntu 14 Walkthrough: Installation of Requirements and Scripts
+### Script Installation Example: Ubuntu 14 Walkthrough
 If you use ubuntu 14, for your convenience we have provided a step by step guide to install the requirements and install the script.
 
 ```
@@ -71,6 +71,7 @@ If you use ubuntu 14, for your convenience we have provided a step by step guide
   source credentials.sh
 ```
 
+
 ## Cluster Creation
 To create a new Kubernetes cluster, simply run the kube-up.sh script. A complete list of script options and some examples are listed below.
 
@@ -78,8 +79,7 @@ To create a new Kubernetes cluster, simply run the kube-up.sh script. A complete
 cd ./adm-kubernetes-on-clc
 bash kube-up.sh -c="name_of_kubernetes_cluster"
 ```
-
-### Script Options
+### Cluster Creation: Script Options
 
 ```
 Usage: kube-up.sh [OPTIONS]
@@ -105,7 +105,37 @@ between option name and option value.
                                    otherwise run etcd on the master node
 ```
 
-### Script Examples
+## Cluster Expansion
+To expand an existing Kubernetes cluster, simply run the add-kube-node.sh script. A complete list of script options and some examples are listed below. This script must be run from the same hose that created the cluster (or a host that has the cluster artifact files stored in ~/.clc_kube/$cluster_name). 
+
+```
+cd ./adm-kubernetes-on-clc
+bash add-kube-node.sh -c="name_of_kubernetes_cluster" -m=2
+```
+
+### Cluster Expansion: Script Options
+
+```
+Usage: add-kube-node.sh [OPTIONS]
+Create servers in the CenturyLinkCloud environment and add to an
+existing CLC kubernetes cluster
+
+Environment variables CLC_V2_API_USERNAME and CLC_V2_API_PASSWD must be set in
+order to access the CenturyLinkCloud API
+
+     -h (--help)                   display this help and exit
+     -c= (--clc_cluster_name=)     set the name of the cluster, as used in CLC group names
+     -m= (--minion_count=)         number of kubernetes minion nodes to add
+     
+```
+
+## Cluster Deletion
+
+To delete a cluster, log into the CenturyLink Cloud control portal and delete the
+parent server group that contains the Kubernetes Cluster. We hope to add a
+scripted option to do this soon.
+
+## Examples
 Create a cluster with name of k8s_1, 1 master node and 3 worker minions (on physical machines), in VA1
 
 ```
@@ -141,7 +171,7 @@ parent server group that contains the Kubernetes Cluster. We hope to add a
 scripted option to do this soon.
 
 ## Cluster features
-Our default installation installs a number of system utilities
+Our default installation installs a number of system utilities. 
 
 ## Cluster management
 
@@ -181,13 +211,13 @@ Hitting the url at https://${MASTER_IP}:6443 will require accepting the self-
 signed certificate from the apiserver, and then presenting the admin password
 found at _${CLC_CLUSTER_HOME}/kube/admin_password.txt_
 
-### Additional add-ons
+## Optional add-ons
 
 Cluster-level log aggregation of pods and containers is not installed by default.
 Please see the additional documentation about [log aggregation](log_aggregration.md)
 for details about our ELK stack deployment.
 
-### _kubectl_ usage examples
+## _kubectl_ usage examples
 
 There are a great many features of _kubectl_.  Here are a few examples
 
@@ -213,7 +243,7 @@ without the need for client certificates in your browser.
 
 ## What Kubernetes features do not work on CenturyLink Cloud
 - At this time, there is no support services of the type 'loadbalancer'. We are actively working on this and hope to publish the changes soon.
-- At this time, there is no support for persistent storage volumes provided by CenturyLink Cloud. However, customers can bring their pwn persistent storage offering.
+- At this time, there is no support for persistent storage volumes provided by CenturyLink Cloud. However, customers can bring their own persistent storage offering. We ourselves use Gluster. 
 
 ## Ansible Files
 If you want more information about our ansible files, please [read this file](ansible/README.md)
