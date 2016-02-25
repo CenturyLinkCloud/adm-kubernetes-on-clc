@@ -9,7 +9,7 @@ If you run into any problems or want help with anything, we are here to help. Re
 - or
 - Send an email to kubernetes AT ctl DOT io
 - or
-- Visit http://www.info.ctl.io/kubernetes
+- Visit http://info.ctl.io/kubernetes
 
 ## Clusters of VMs or Physical Servers, your choice.
 - We support Kubernetes clusters on both Virtual Machines or Physical Servers. If you want to use physical servers for the worker nodes (minions), simple use the --minion_type=bareMetal flag.
