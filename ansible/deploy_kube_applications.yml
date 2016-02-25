@@ -5,7 +5,12 @@
   vars_files:
     - vars.yml
 
-- hosts: kube-master[0]
+  tasks:
+    - name: Set etcd url
+      set_fact:
+        etcd_endpoint: "{% for host in groups[etcd_group] %}http://{{ hostvars[host]['ansible_default_ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
+
+- hosts: master[0]
   gather_facts: True
   vars_files:
     - vars.yml

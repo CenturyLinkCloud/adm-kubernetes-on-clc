@@ -2,10 +2,6 @@
 ## vars file for clc-provisioning, contains constants that are defined by the
 ## CenturyLink infrastructure and are unlikely to be overridden
 
-# distinctive CenturyLink Kubernetes tag for server names -> [version][K8].
-# Is combined with other characters at deployment time to meet the 6 char limit
-distinctive_tag: V03K8
-
 ## identifier for the blueprint that copies ssh keys
 ssh_key_package_id: "77abb844-579d-478d-3955-c69ab4a7ba1a"
 

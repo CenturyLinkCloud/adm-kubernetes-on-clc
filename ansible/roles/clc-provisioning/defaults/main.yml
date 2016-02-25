@@ -40,5 +40,8 @@ server_storage: standard
 ##         type: partitioned
 server_additional_disks: []
 
+## etcd is dployed to the master group unless otherwise specified
+etcd_group: master
+
 ## an ansible inventory file will be written to this directory
 ansible_hosts_directory: "{{ clc_cluster_home }}/hosts"

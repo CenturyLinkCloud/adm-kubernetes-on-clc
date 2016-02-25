@@ -10,8 +10,8 @@
 
 - name: Add kubernetes application files
   template: src={{ item }}.yml.j2 dest="/opt/kubernetes/manifest/{{ item }}{{ app_label }}.yml"
-  with_items: "{{ k8s_apps }}"
+  with_items: k8s_apps
 
 - name: Install the kubernetes applications
   shell: kubectl create -f "/opt/kubernetes/manifest/{{ item }}{{ app_label }}.yml"
-  with_items: "{{ k8s_apps }}"
+  with_items: k8s_apps

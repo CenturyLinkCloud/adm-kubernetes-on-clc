@@ -53,7 +53,6 @@ function exit_message() {
 
 # default values before reading the command-line args
 datacenter=VA1
-etcd_group=kube-master
 minion_count=2
 minion_type=standard
 server_config_id=default
@@ -103,7 +102,6 @@ case $i in
     --etcd_separate_cluster*)
     # the ansible variable "etcd_group" has default value "master"
     etcd_separate_cluster=yes
-    etcd_group=etcd
     shift # past argument with no value
     ;;
 
@@ -160,9 +158,7 @@ else
 
   cat <<CONFIG > ${CLC_CLUSTER_HOME}/config/master_config.yml
 clc_cluster_name: ${CLC_CLUSTER_NAME}
-server_group: kube-master
-etcd_group: ${etcd_group}
-server_group_tag: master
+server_group: master
 datacenter: ${datacenter}
 server_count: 1
 server_config_id: default
@@ -175,8 +171,7 @@ CONFIG
 
   cat <<CONFIG > ${CLC_CLUSTER_HOME}/config/minion_config.yml
 clc_cluster_name: ${CLC_CLUSTER_NAME}
-server_group: kube-node
-server_group_tag: node
+server_group: minion
 datacenter: ${datacenter}
 server_count: ${minion_count}
 minion_type: ${minion_type}
@@ -253,7 +248,7 @@ CONFIG
   # write timestamp into flag file
   date +%Y-%m-%dT%H-%M-%S%z > $created_flag
 
-fi # checking [ -e $created_flag ]
+fi # checking [ -e $hosts_file ]
 
 #### verify access
 ansible -i ${CLC_CLUSTER_HOME}/hosts -m shell -a uptime all
