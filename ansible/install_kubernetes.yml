@@ -65,7 +65,6 @@
     - flannel-network
     - flannel-client
     - kubernetes
-    - kubernetes-node
     - kubernetes-master
 
 - name: Save master configuration information to minion_config
