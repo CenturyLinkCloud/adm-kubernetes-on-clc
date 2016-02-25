@@ -266,7 +266,7 @@ ansible-playbook -i ${CLC_CLUSTER_HOME}/hosts install_kubernetes.yml \
 
 #### Part4
 echo "Part4 - Installing standard addons"
-standard_addons='{"k8s_apps":["skydns","kube-ui","monitoring"]}'
+standard_addons='{"k8s_apps":["skydns","dashboard","monitoring"]}'
 ansible-playbook -i ${CLC_CLUSTER_HOME}/hosts deploy_kube_applications.yml \
      -e ${standard_addons}
 
