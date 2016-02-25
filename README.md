@@ -49,9 +49,9 @@ cp ansible/credentials.sh.template ansible/credentials.sh
 vi ansible/credentials.sh
 source ansible/credentials.sh
 
+```
 4) Make sure the computer you are working on has access to the CenturyLink Cloud network. This is done by using a VM inside the CenturyLink Cloud network or having an active VPN connection to the CenturyLink Cloud network. To find out how to configure the VPN connection, [visit here](https://www.ctl.io/knowledge-base/network/how-to-configure-client-vpn/)
 
-```
 
 ### Script Installation Example: Ubuntu 14 Walkthrough
 If you use an ubuntu 14, for your convenience we have provided a step by step guide to install the requirements and install the script.
@@ -172,16 +172,6 @@ Create a cluster with name of k8s_3, 1 master node, and 10 worker minions (on VM
   bash kube-up.sh --clc_cluster_name=k8s_3 --minion_type=standard --minion_count=10 --datacenter=VA1 -mem=6 -cpu=4
 ```
 
-### Configuration files
-
-Various configuration files are written into the home directory under
-_.clc_kube/${CLC_CLUSTER_NAME}_ in several subdirectories
-
-* _config/_: ansible variable files containing parameters describing the master and minion hosts
-* _hosts/_: hosts files listing access information for the ansible playbooks
-* _kube/_: kubectl configuration files, and the basic-authentication password for admin access to the kubernetes api
-* _pki/_: public key infrastructure files enabling TLS communication in the cluster
-* _ssh/_: ssh keys for root access to the hosts
 
 
 ## Cluster Features and Architecture
@@ -238,11 +228,28 @@ distributed with OSX
 
 ### Accessing the cluster with a browser
 
-The cluster is set up to use basic authentication for the user _admin_.  
+We install two UIs on kubernetes. The orginal KubeUI and the newer kube dashboard. When you create a cluster, the script should output URLs for these interfaces like this:
+
+KubeUI is running at https://${MASTER_IP}:6443/api/v1/proxy/namespaces/kube-system/services/kube-ui
+kubernetes-dashboard is running at https://${MASTER_IP}:6443/api/v1/proxy/namespaces/kube-system/services/kubernetes-dashboard
+
+Note on Authentication to the UIs: The cluster is set up to use basic authentication for the user _admin_.  
 Hitting the url at https://${MASTER_IP}:6443 will require accepting the self-
 signed certificate from the apiserver, and then presenting the admin password
 found at _${CLC_CLUSTER_HOME}/kube/admin_password.txt_
 
+
+### Configuration files
+
+Various configuration files are written into the home directory under
+_.clc_kube/${CLC_CLUSTER_NAME}_ in several subdirectories. You can use these files
+to access the cluster from machines other than where you created the cluster from. 
+
+* _config/_: ansible variable files containing parameters describing the master and minion hosts
+* _hosts/_: hosts files listing access information for the ansible playbooks
+* _kube/_: kubectl configuration files, and the basic-authentication password for admin access to the kubernetes api
+* _pki/_: public key infrastructure files enabling TLS communication in the cluster
+* _ssh/_: ssh keys for root access to the hosts
 
 
 ## _kubectl_ usage examples
