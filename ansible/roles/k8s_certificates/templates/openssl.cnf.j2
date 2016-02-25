@@ -12,7 +12,7 @@ DNS.1 = kubernetes
 DNS.2 = kubernetes.default
 DNS.3 = kubernetes.default.svc
 IP.1 = {{ cluster_k8s_service_vip }}
-{% for host in groups['master'] %}
+{% for host in groups['kube-master'] %}
 {% set offset = loop.index + 1 %}
 IP.{{ offset }} = {{ hostvars[host]['ansible_default_ipv4']['address'] }}
 {% endfor %}
