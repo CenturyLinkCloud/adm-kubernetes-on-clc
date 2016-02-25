@@ -1,4 +1,3 @@
-etcd_group: master
 cluster_service_vip_range: 10.0.0.0/16
 cluster_k8s_service_vip: 10.0.0.1
 cluster_dns_replicas: 1

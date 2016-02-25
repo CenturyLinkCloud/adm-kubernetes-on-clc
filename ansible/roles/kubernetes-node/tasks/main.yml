@@ -36,3 +36,5 @@
     name: kube-proxy
     enabled: True
     state: running
+
+- meta: flush_handlers
