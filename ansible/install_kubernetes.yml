@@ -9,7 +9,7 @@
 
   vars_files:
     - vars.yml
-
+    - "{{ config_vars }}"
   vars:
     - clc_cluster_home: "{{ lookup('env','HOME') }}/.clc_kube/{{ clc_cluster_name }}"
     - cert_dir: "{{ clc_cluster_home }}/pki"
@@ -31,10 +31,11 @@
 
 
 - name: Provision kubernetes Master
-  hosts: master
+  hosts: kube-master
   gather_facts: True
   vars_files:
     - vars.yml
+    - "{{ config_vars }}"
   vars:
     - apiserver_endpoint: https://{{ ansible_default_ipv4.address }}:6443
 
@@ -80,15 +81,15 @@
         line: "master_ip: {{ hostvars[ item ].ansible_default_ipv4.address  }}"
         state: present
         regexp: "^master_ip:"
-      with_items: groups["master"][0]
+      with_items: "{{groups['kube-master'][0]}}"
 
 
-- name: Provision kubernetes minion
-  hosts: minion
+- name: Provision kubernetes node
+  hosts: kube-node
 
   vars_files:
     - vars.yml
-
+    - "{{ config_vars }}"
   vars:
     - clc_cluster_home: "{{ lookup('env','HOME') }}/.clc_kube/{{ clc_cluster_name }}"
     - cert_dir: "{{ clc_cluster_home }}/pki"
@@ -105,7 +106,7 @@
 
     - set_fact:
         master_ip: "{{ hostvars[ item ].ansible_default_ipv4.address }}"
-      with_items: groups['master'][0]
+      with_items: "{{groups['kube-master'][0]}}"
       when: master_ip is not defined
 
     - set_fact:
