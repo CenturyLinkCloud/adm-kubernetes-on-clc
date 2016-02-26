@@ -1,7 +1,7 @@
 # Kubernetes on CenturyLink Cloud
 These scripts handle the creation, deletion and expansion of kubernetes clusters on CenturyLink Cloud. 
 
-You can accomplish all these tasks with a simple single command. And, for those interested, we use Ansible to perform these tasks. 
+You can accomplish all these tasks with a simple single command. And, for those interested in what's under the covers, we used Ansible to perform these tasks and we have made these Ansible playbooks available as well. 
 
 ## Find Help
 If you run into any problems or want help with anything, we are here to help. Reach out to use via any of the following ways:
