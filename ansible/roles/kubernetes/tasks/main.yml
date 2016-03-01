@@ -1,14 +1,43 @@
 - name: Download kubernetes release.
-  get_url: url={{ kubernetes_url }} dest=/tmp/kubernetes.tar.gz
+  get_url:
+    url: "{{ kubernetes_url }}"
+    dest: /tmp/kubernetes.tar.gz
 
 - name: Unarchive kubernetes release.
-  unarchive: src=/tmp/kubernetes.tar.gz dest=/var/lib/ copy=false group=root owner=root mode=755
+  unarchive:
+    src: /tmp/kubernetes.tar.gz
+    dest: /var/lib/
+    copy: false
+    group: root
+    owner: root
+    mode: 755
 
+# - name: Unarchive kubernetes release binaries.
+#   unarchive:
+#     src: /var/lib/kubernetes/server/kubernetes-server-linux-amd64.tar.gz
+#     dest: /var/lib/kubernetes/server
+#     copy: false
+#     group: root
+#     owner: root
+#     mode: 755
+
+# ansible unarchive seems to be broken on filenames with backslash+tildes, complains
+# -->  No such file or directory: '/tmp/kubernetes/addons/gcr.io\\\\\\\\~google_containers\\\\\\\\~kube-registry-proxy:0.3.tar'"
+# filenames are created that way when building on OSX :(
 - name: Unarchive kubernetes release binaries.
-  unarchive: src=/var/lib/kubernetes/server/kubernetes-server-linux-amd64.tar.gz dest=/var/lib/kubernetes/server copy=false group=root owner=root mode=755
+  shell: >
+    tar -xzf /var/lib/kubernetes/server/kubernetes-server-linux-amd64.tar.gz
+    -C /var/lib/kubernetes/server
+    --exclude-tag-under /kubernetes/addons
 
 - name: Create symbolic links to kubernetes binaries.
-  file: src=/var/lib/kubernetes/server/kubernetes/server/bin/{{ item }} dest=/usr/bin/{{ item }} owner=root group=root state=link
+  file:
+    src: "/var/lib/kubernetes/server/kubernetes/server/bin/{{ item }}"
+    dest: "/usr/bin/{{ item }}"
+    owner: root
+    group: root
+    state: link
+    mode: 755
   with_items:
     - kube-apiserver
     - kube-controller-manager
