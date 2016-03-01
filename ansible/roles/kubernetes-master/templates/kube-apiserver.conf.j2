@@ -5,7 +5,7 @@ script
 
 	KUBE_APISERVER_OPTS="\
 		--address=0.0.0.0 \
-		--admission_control=NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota \
+		--admission_control=NamespaceLifecycle,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota \
 		--advertise-address={{ ansible_default_ipv4.address }} \
 		--allow-privileged=true \
 		--basic-auth-file=/srv/kubernetes/password \
