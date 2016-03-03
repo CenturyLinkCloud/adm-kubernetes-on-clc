@@ -267,7 +267,8 @@ ansible-playbook -i ${CLC_CLUSTER_HOME}/hosts install_etcd.yml \
 #### Part3
 echo "Part3 - Setting up kubernetes"
 ansible-playbook -i ${CLC_CLUSTER_HOME}/hosts install_kubernetes.yml \
-    -e config_vars=${CLC_CLUSTER_HOME}/config/master_config.yml
+    -e config_vars_master=${CLC_CLUSTER_HOME}/config/master_config.yml \
+    -e config_vars_minion=${CLC_CLUSTER_HOME}/config/minion_config.yml \
 
 #### Part4
 echo "Part4 - Installing standard addons"
