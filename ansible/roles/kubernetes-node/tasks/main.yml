@@ -4,6 +4,11 @@
     path: /var/lib/kubelet
     state: directory
 
+- name: Create kubelet manifest directory
+  file:
+    path: /etc/kubernetes/manifests
+    state: directory
+
 - name: Template kubelet config with certificate data
   template:
     src: roles/kubernetes-node/templates/kubelet-kubeconfig.j2

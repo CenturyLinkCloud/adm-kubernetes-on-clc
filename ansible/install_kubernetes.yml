@@ -55,9 +55,10 @@
     - name: Set etcd url for cluster in group "{{ etcd_group }}"
       set_fact:
         etcd_endpoint: "{% for host in groups[etcd_group] %}http://{{ hostvars[host]['ansible_default_ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
-    - name: include vars for master configuration
-      include_vars: "{{ config_vars }}"
-      when: config_vars is defined
+    - name: set max pod value if bareMetal server
+      set_fact:
+        kubelet_max_pods: 240
+      when: (minion_type is defined) and (minion_type == 'bareMetal')
 
   roles:
     - resolv

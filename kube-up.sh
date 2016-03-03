@@ -35,7 +35,7 @@ not take arguments
      -m= (--minion_count=)         number of kubernetes minion nodes
      -mem= (--vm_memory=)          number of GB ram for each minion
      -cpu= (--vm_cpu=)             number of virtual cps for each minion node
-     -t= (--minion_type=)          standard -> VM (default), bareMetal -> physical]
+     -t= (--minion_type=)          "standard" [default, a VM] or "bareMetal" [a physical server]
      -phyid= (--server_config_id=) if obtaining a bareMetal server, this configuration id
                                    must be set to one of:
                                       physical_server_20_core
@@ -131,7 +131,7 @@ if [[ ${minion_type} == "standard" ]]
 then
   if [[ ${server_config_id} != "default" ]]
   then
-    exit_message "Server configuration of \"${server_config_id}\" is not compatible with ${minion_type} VM, use \"default\""
+    exit_message "server_config_id=\"${server_config_id}\" is not compatible with minion_type=\"${minion_type}\""
   fi
 elif [[ ${minion_type} == "bareMetal" ]]
 then
