@@ -22,8 +22,11 @@ function show_help() {
 cat << EOF
 Usage: ${0##*/} [OPTIONS]
 Create servers in the CenturyLinkCloud environment and initialize a Kubernetes cluster
-Environment variables CLC_V2_API_USERNAME and CLC_V2_API_PASSWD must be set in
-order to access the CenturyLinkCloud API
+Environment variables
+  CLC_CLUSTER_NAME (may be set with command-line option]
+  CLC_V2_API_USERNAME (required)
+  CLC_V2_API_PASSWD (required)
+  
 
 Most options (both short and long form) require arguments, and must include "="
 between option name and option value. _--help_ and _--etcd_separate_cluster_ do
@@ -48,6 +51,9 @@ EOF
 
 function exit_message() {
     echo "ERROR: $1" >&2
+    echo
+    echo
+    show_help
     exit 1
 }
 
