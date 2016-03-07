@@ -71,12 +71,8 @@ spec:
     spec:
       #serviceAccount: "heapster"
       containers:
-        - image: gcr.io/google_containers/heapster:v0.18.2
+        - image: kubernetes/heapster:canary
           name: heapster
-          resources:
-            limits:
-              cpu: 600m
-              memory: 900Mi
           command:
           - /heapster
           - --source=kubernetes:https://kubernetes.default
@@ -123,12 +119,8 @@ spec:
     spec:
       #serviceAccount: "influx-grafana"
       containers:
-        - image: gcr.io/google_containers/heapster_influxdb:v0.4
+        - image: kubernetes/heapster_influxdb:v0.6
           name: influxdb
-          resources:
-            limits:
-              cpu: 900m
-              memory: 900Mi
           ports:
             - containerPort: 8083
               hostPort: 8083
@@ -137,13 +129,8 @@ spec:
           volumeMounts:
           - name: influxdb-persistent-storage
             mountPath: /data
-        - image: beta.gcr.io/google_containers/heapster_grafana:v2.1.1
+        - image: kubernetes/heapster_grafana:v2.5.0
           name: grafana
-          env:
-          resources:
-            limits:
-              cpu: 100m
-              memory: 100Mi
           env:
             # This variable is required to setup templates in Grafana.
             - name: INFLUXDB_SERVICE_URL
