@@ -24,8 +24,8 @@
 
   pre_tasks:
     - name: include vars for configuration
-      include_vars: "{{ config_vars }}"
-      when: config_vars is defined
+      include_vars: "{{ config_vars_minion }}"
+      when: config_vars_minion is defined
 
     - name: Check for Minion_type
       set_fact:

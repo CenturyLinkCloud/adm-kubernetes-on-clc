@@ -23,22 +23,21 @@ function exit_message() {
     exit 1
 }
 
+# set count=1 as default
+minion_count=1
 
 for i in "$@"
 do
 case $i in
     -h|--help)
     show_help && exit 0
-    shift # past argument=value
     ;;
     -c=*|--clc_cluster_name=*)
     CLC_CLUSTER_NAME="${i#*=}"
-    extra_args="$extra_args clc_cluster_name=$CLC_CLUSTER_NAME"
     shift # past argument=value
     ;;
     -m=*|--minion_count=*)
     minion_count="${i#*=}"
-    extra_args="$extra_args minion_count=$minion_count"
     shift # past argument=value
     ;;
     *)
@@ -79,6 +78,7 @@ ansible-playbook create-minion-hosts.yml \
   -e config_vars_minion=${CLC_CLUSTER_HOME}/config/minion_config.yml
 
 #### verify access
+echo ansible -i $hosts_dir   -m shell -a uptime all
 ansible -i $hosts_dir   -m shell -a uptime all
 
 #### Part3
