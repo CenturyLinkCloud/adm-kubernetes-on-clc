@@ -110,7 +110,7 @@
 
     - name: set max pod value if bareMetal server
       set_fact:
-        kubelet_max_pods: 240
+        kubelet_max_pods: 100
       when: (minion_type is defined) and (minion_type == 'bareMetal')
 
   roles:
