@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 # deploy k8s cluster on clc
 #
