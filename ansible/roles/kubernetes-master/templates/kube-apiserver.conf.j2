@@ -1,24 +1,23 @@
 description "kube-apiserver service"
-author "mark ramach"
 
-script
+start on runlevel [2345]
+stop on runlevel [!2345]
 
-	KUBE_APISERVER_OPTS="\
-		--address=0.0.0.0 \
-		--admission_control=NamespaceLifecycle,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota \
-		--advertise-address={{ ansible_default_ipv4.address }} \
-		--allow-privileged=true \
-		--basic-auth-file=/srv/kubernetes/password \
-		--client-ca-file=/srv/kubernetes/ca.crt \
-		--etcd-servers={{ etcd_endpoint }} \
-		--runtime-config=extensions/v1beta1/daemonsets=true \
-		--service-account-key-file=/srv/kubernetes/server.key \
-		--service-cluster-ip-range={{ cluster_service_vip_range }} \
-		--tls-cert-file=/srv/kubernetes/server.crt \
-		--tls-private-key-file=/srv/kubernetes/server.key \
-		--token-auth-file=/srv/kubernetes/known_tokens.csv \
-    "
+kill timeout 60
 
-	exec kube-apiserver $KUBE_APISERVER_OPTS > /var/log/kube-apiserver.log
-
-end script
+exec kube-apiserver \
+	--address=0.0.0.0 \
+	--admission_control=NamespaceLifecycle,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota \
+	--advertise-address={{ ansible_default_ipv4.address }} \
+	--allow-privileged=true \
+	--basic-auth-file=/srv/kubernetes/password \
+	--client-ca-file=/srv/kubernetes/ca.crt \
+	--cloud-config="/etc/clc/clc.conf" \
+	--cloud-provider="clc" \
+	--etcd-servers={{ etcd_endpoint }} \
+	--runtime-config=extensions/v1beta1/daemonsets=true \
+	--service-account-key-file=/srv/kubernetes/server.key \
+	--service-cluster-ip-range={{ cluster_service_vip_range }} \
+	--tls-cert-file=/srv/kubernetes/server.crt \
+	--tls-private-key-file=/srv/kubernetes/server.key \
+	--token-auth-file=/srv/kubernetes/known_tokens.csv

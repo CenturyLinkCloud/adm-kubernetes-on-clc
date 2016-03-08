@@ -12,6 +12,8 @@ exec kubelet \
 	--allow-privileged={{ allow_privileged }}\
 	--api-servers={{ apiserver_endpoint }} \
 	--cadvisor-port=4194 \
+	--cloud-config="/etc/clc/clc.conf" \
+	--cloud-provider="clc" \
 	--cluster-dns={{ cluster_dns_service_vip }} \
 	--cluster-domain={{ cluster_dns_domain }} \
 	--config="/etc/kubernetes/manifests" \
@@ -19,4 +21,4 @@ exec kubelet \
 	--kubeconfig="/var/lib/kubelet/kubeconfig" \
 	--max-pods={{ kubelet_max_pods }} \
 	--register-node=true \
-	--serialize-image-pulls=false 
+	--serialize-image-pulls=false
