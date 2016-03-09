@@ -26,7 +26,7 @@ Environment variables
   CLC_CLUSTER_NAME (may be set with command-line option]
   CLC_V2_API_USERNAME (required)
   CLC_V2_API_PASSWD (required)
-  
+
 
 Most options (both short and long form) require arguments, and must include "="
 between option name and option value. _--help_ and _--etcd_separate_cluster_ do
@@ -46,6 +46,7 @@ not take arguments
                                       physical_server_4_core
      --etcd_separate_cluster       create a separate cluster of three etcd nodes,
                                    otherwise run etcd on the master node
+     -v                            additional verbose output
 EOF
 }
 
@@ -68,6 +69,7 @@ vm_cpu=2
 skip_minion=False
 async_time=7200
 async_poll=5
+verbose_flag=
 
 for i in "$@"
 do
@@ -110,6 +112,11 @@ case $i in
     # the ansible variable "etcd_group" has default value "master"
     etcd_separate_cluster=yes
     etcd_group=etcd
+    shift # past argument with no value
+    ;;
+
+    -v)
+    verbose_flag=-vvvv
     shift # past argument with no value
     ;;
 
@@ -212,11 +219,13 @@ CONFIG
   pids=""
 
   { ansible-playbook create-master-hosts.yml \
+      ${verbose_flag} \
       -e config_vars=${CLC_CLUSTER_HOME}/config/master_config.yml;
   } &
   pids="$pids $!"
 
   { ansible-playbook create-minion-hosts.yml \
+      ${verbose_flag} \
       -e config_vars=${CLC_CLUSTER_HOME}/config/minion_config.yml;
   } &
   pids="$pids $!"
@@ -226,6 +235,7 @@ CONFIG
   else
     echo "ETCD will be installed on 3 separate VMs not part of k8s cluster"
     { ansible-playbook create-etcd-hosts.yml  \
+        ${verbose_flag} \
         -e config_vars=${CLC_CLUSTER_HOME}/config/master_config.yml;
     } &
     pids="$pids $!"
@@ -262,17 +272,19 @@ CONFIG
 fi # checking [ -e $created_flag ]
 
 #### verify access
-ansible -i ${CLC_CLUSTER_HOME}/hosts -m shell -a uptime all
+ansible ${verbose_flag} -i ${CLC_CLUSTER_HOME}/hosts -m shell -a uptime all
 
 #### Part2
 echo "Part2 - Setting up etcd"
 #install etcd on master or on separate cluster of vms
 ansible-playbook -i ${CLC_CLUSTER_HOME}/hosts install_etcd.yml \
+    ${verbose_flag} \
     -e config_vars=${CLC_CLUSTER_HOME}/config/master_config.yml
 
 #### Part3
 echo "Part3 - Setting up kubernetes"
 ansible-playbook -i ${CLC_CLUSTER_HOME}/hosts install_kubernetes.yml \
+    ${verbose_flag} \
     -e config_vars_master=${CLC_CLUSTER_HOME}/config/master_config.yml \
     -e config_vars_minion=${CLC_CLUSTER_HOME}/config/minion_config.yml \
 
@@ -280,7 +292,7 @@ ansible-playbook -i ${CLC_CLUSTER_HOME}/hosts install_kubernetes.yml \
 echo "Part4 - Installing standard addons"
 standard_addons='{"k8s_apps":["skydns","dashboard","kube-ui","monitoring"]}'
 ansible-playbook -i ${CLC_CLUSTER_HOME}/hosts deploy_kube_applications.yml \
-     -e ${standard_addons}
+   ${verbose_flag} -e ${standard_addons}
 
 cat <<MESSAGE
 

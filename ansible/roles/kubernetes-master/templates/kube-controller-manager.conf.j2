@@ -3,6 +3,8 @@ description "kube-controller-manager service"
 start on runlevel [2345]
 stop on runlevel [!2345]
 
+limit nofile 100000 100000
+
 kill timeout 60
 
 exec kube-controller-manager \

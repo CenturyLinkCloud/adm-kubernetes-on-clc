@@ -3,6 +3,8 @@ description "kube-scheduler service"
 start on runlevel [2345]
 stop on runlevel [!2345]
 
+limit nofile 10000 10000
+
 kill timeout 60
 
 exec kube-scheduler \

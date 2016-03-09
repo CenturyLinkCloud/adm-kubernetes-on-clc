@@ -57,6 +57,7 @@
         etcd_endpoint: "{% for host in groups[etcd_group] %}http://{{ hostvars[host]['ansible_default_ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
 
   roles:
+    # - ubuntu-14-update # kernel upgrade is unnecessary for master
     - resolv
     - etcd
     - flannel
@@ -114,6 +115,7 @@
       when: (minion_type is defined) and (minion_type == 'bareMetal')
 
   roles:
+    - ubuntu-14-update
     - resolv
     - etcd
     - flannel
