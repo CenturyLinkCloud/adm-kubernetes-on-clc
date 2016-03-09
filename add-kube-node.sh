@@ -75,15 +75,19 @@ ansible-playbook create-minion-hosts.yml \
   -e add_nodes=1 \
   -e minion_count=$minion_count \
   -e config_vars_master=${CLC_CLUSTER_HOME}/config/master_config.yml \
-  -e config_vars_minion=${CLC_CLUSTER_HOME}/config/minion_config.yml
+  -e config_vars_minion=${CLC_CLUSTER_HOME}/config/minion_config.yml 
 
 #### verify access
 echo ansible -i $hosts_dir   -m shell -a uptime all
 ansible -i $hosts_dir   -m shell -a uptime all
 
+echo $hosts_dir
 #### Part3
 echo "Part3 - Setting up kubernetes"
-ansible-playbook -i $hosts_dir  \
+ansible-playbook install_kubernetes.yml -i $hosts_dir \
    -e config_vars_master=${CLC_CLUSTER_HOME}/config/master_config.yml \
    -e config_vars_minion=${CLC_CLUSTER_HOME}/config/minion_config.yml \
-   install_kubernetes.yml  --limit kube-node
+   --limit kube-node 
+   
+   
+   

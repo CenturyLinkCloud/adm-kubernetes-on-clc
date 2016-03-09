@@ -1,102 +1,5 @@
 ---
 apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: influx-grafana
-  namespace: kube-system
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: heapster
-  namespace: kube-system
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: monitoring-grafana
-  namespace: kube-system
-  labels:
-    kubernetes.io/cluster-service: "true"
-    kubernetes.io/name: "Grafana"
-spec:
-  # On production clusters, consider setting up auth for grafana, and
-  # exposing Grafana either using a LoadBalancer or a public IP.
-  # type: LoadBalancer
-  ports:
-    - port: 80
-      targetPort: 3000
-  selector:
-    k8s-app: influxGrafana
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: monitoring-influxdb
-  namespace: kube-system
-  labels:
-    kubernetes.io/cluster-service: "true"
-    kubernetes.io/name: "InfluxDB"
-spec:
-  ports:
-    - name: http
-      port: 8083
-      targetPort: 8083
-    - name: api
-      port: 8086
-      targetPort: 8086
-  selector:
-    k8s-app: influxGrafana
----
-apiVersion: v1
-kind: ReplicationController
-metadata:
-  name: heapster-v10
-  namespace: kube-system
-  labels:
-    k8s-app: heapster
-    version: v10
-    kubernetes.io/cluster-service: "true"
-spec:
-  replicas: 1
-  selector:
-    k8s-app: heapster
-    version: v10
-  template:
-    metadata:
-      labels:
-        k8s-app: heapster
-        version: v10
-        kubernetes.io/cluster-service: "true"
-    spec:
-      #serviceAccount: "heapster"
-      containers:
-        - image: kubernetes/heapster:canary
-          name: heapster
-          command:
-          - /heapster
-          - --source=kubernetes:https://kubernetes.default
-          #- --source="cadvisor:external?cadvisorPort=4194"
-          - --sink=influxdb:http://monitoring-influxdb:8086
-            
----
-kind: Service
-apiVersion: v1
-metadata:
-  name: heapster
-  namespace: kube-system
-  labels:
-    kubernetes.io/cluster-service: "true"
-    kubernetes.io/name: "Heapster"
-spec:
-  ports:
-    - port: 80
-      targetPort: 8082
-  selector:
-    k8s-app: heapster
-
----
-apiVersion: v1
 kind: ReplicationController
 metadata:
   name: monitoring-influxdb-grafana-v2
@@ -156,4 +59,94 @@ spec:
         emptyDir: {}
       - name: grafana-persistent-storage
         emptyDir: {}
+        
 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: monitoring-grafana
+  namespace: kube-system
+  labels:
+    kubernetes.io/cluster-service: "true"
+    kubernetes.io/name: "Grafana"
+spec:
+  # On production clusters, consider setting up auth for grafana, and
+  # exposing Grafana either using a LoadBalancer or a public IP.
+  # type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 3000
+  selector:
+    k8s-app: influxGrafana
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: monitoring-influxdb
+  namespace: kube-system
+  labels:
+    kubernetes.io/cluster-service: "true"
+    kubernetes.io/name: "InfluxDB"
+spec:
+  ports:
+    - name: http
+      port: 8083
+      targetPort: 8083
+    - name: api
+      port: 8086
+      targetPort: 8086
+  selector:
+    k8s-app: influxGrafana
+
+            
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: heapster
+  namespace: kube-system
+  labels:
+    kubernetes.io/cluster-service: "true"
+    kubernetes.io/name: "Heapster"
+spec:
+  ports:
+    - port: 80
+      targetPort: 8082
+  selector:
+    k8s-app: heapster
+
+
+
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: heapster-v10
+  namespace: kube-system
+  labels:
+    k8s-app: heapster
+    version: v10
+    kubernetes.io/cluster-service: "true"
+spec:
+  replicas: 1
+  selector:
+    k8s-app: heapster
+    version: v10
+  template:
+    metadata:
+      labels:
+        k8s-app: heapster
+        version: v10
+        kubernetes.io/cluster-service: "true"
+    spec:
+      #serviceAccount: "heapster"
+      containers:
+        - image: kubernetes/heapster:canary
+          name: heapster
+          command:
+          - /heapster
+          - --source=kubernetes:https://kubernetes.default
+          #- --source="cadvisor:external?cadvisorPort=4194"
+          - --sink=influxdb:http://monitoring-influxdb:8086
+          
