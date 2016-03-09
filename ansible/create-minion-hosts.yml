@@ -24,6 +24,10 @@
 
   pre_tasks:
     - name: include vars for configuration
+      include_vars: "{{ config_vars }}"
+      when: config_vars is defined
+
+    - name: include minion-specific vars for configuration
       include_vars: "{{ config_vars_minion }}"
       when: config_vars_minion is defined
 
