@@ -86,15 +86,15 @@ simple to implement scheduling using Kubernetes jobs.
 The _fluentd_ pod is run as a DaemonSet so that it runs once and once only on
 each minion node. Container log directories on the node are automatically
 mounted into the _fluentd_ container, and the logs parsed and sent to the
-elasticsearch instance at
-http://elasticsearch-logging:9200
+elasticsearch instance at http://elasticsearch-logging:9200
 
 ### Kibana
 
-_kibana_ also communicates with http://elasticsearch-logging:9200.  It is exposed as a
-NodePort at port 30056, so the UI can be accessed at http://[ANY_NODE_IP]:30056.
-Searching, manipulating and visualizing the output is highly dependent on the
-contents, and in a bare cluster, most or all of the logging will be from the
+_kibana_ also communicates with http://elasticsearch-logging:9200.  It is
+exposed as a NodePort at port 30056, so the UI can be accessed at
+http://[ANY_NODE_IP]:30056. Searching, manipulating and visualizing the output
+is highly dependent on the contents, and in a bare cluster, most or all of the
+logging will be from the kube-system components and their healthchecks.
 
 Please note, it is _not_ possible to access the kibana UI from the proxy-api.
 Although (a) _cluster-info_ will report something like

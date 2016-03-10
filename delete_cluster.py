@@ -95,9 +95,9 @@ if __name__=="__main__":
     import os
     import shutil
 
-    parser = argparse.ArgumentParser(description='Delete a CLC Kubernetes group and all of its configuration')
-    parser.add_argument('--cluster', dest='clc_cluster_name', required=1)
-    parser.add_argument('--datacenter', dest='datacenter', required=1)
+    parser = argparse.ArgumentParser(description='Delete a CLC Kubernetes group and all of its local configuration files')
+    parser.add_argument('-c','--clc_cluster_name', dest='clc_cluster_name', required=1)
+    parser.add_argument('-d','--datacenter', dest='datacenter', required=1)
 
     args = parser.parse_args()
 
@@ -111,7 +111,7 @@ if __name__=="__main__":
     local_config = os.environ["HOME"] + "/.clc_kube/" + args.clc_cluster_name
 
     print "Running this script will permanently delete cluster \""+args.clc_cluster_name+ "\""
-    print "and all local configuration files " +local_config 
+    print "and all local configuration files " +local_config
     print "Continue? [Yn]"
     response=raw_input()
 
