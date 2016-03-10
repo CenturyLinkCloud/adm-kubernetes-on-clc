@@ -12,6 +12,8 @@ exec kube-apiserver \
 	--allow-privileged=true \
 	--basic-auth-file=/srv/kubernetes/password \
 	--client-ca-file=/srv/kubernetes/ca.crt \
+	--cloud-config="/etc/clc/clc.conf" \
+	--cloud-provider="clc" \
 	--etcd-servers={{ etcd_endpoint }} \
 	--runtime-config=extensions/v1beta1/daemonsets=true \
 	--service-account-key-file=/srv/kubernetes/server.key \
