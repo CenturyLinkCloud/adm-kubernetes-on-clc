@@ -2,29 +2,36 @@
 apiVersion: v1
 kind: ReplicationController
 metadata:
-  name: monitoring-influxdb-grafana-v2
+  name: monitoring-influxdb-grafana-v3
   namespace: kube-system
-  labels:
+  labels: 
     k8s-app: influxGrafana
-    version: v2
+    version: v3
     kubernetes.io/cluster-service: "true"
-spec:
+spec: 
   replicas: 1
-  selector:
+  selector: 
     k8s-app: influxGrafana
-    version: v2
-  template:
-    metadata:
-      labels:
+    version: v3
+  template: 
+    metadata: 
+      labels: 
         k8s-app: influxGrafana
-        version: v2
+        version: v3
         kubernetes.io/cluster-service: "true"
-    spec:
-      #serviceAccount: "influx-grafana"
-      containers:
-        - image: kubernetes/heapster_influxdb:v0.6
+    spec: 
+      containers: 
+        - image: gcr.io/google_containers/heapster_influxdb:v0.5
           name: influxdb
-          ports:
+          resources:
+            # keep request = limit to keep this container in guaranteed class
+            limits:
+              cpu: 100m
+              memory: 500Mi
+            requests:
+              cpu: 100m
+              memory: 500Mi
+          ports: 
             - containerPort: 8083
               hostPort: 8083
             - containerPort: 8086
@@ -32,8 +39,17 @@ spec:
           volumeMounts:
           - name: influxdb-persistent-storage
             mountPath: /data
-        - image: kubernetes/heapster_grafana:v2.5.0
+        - image: gcr.io/google_containers/heapster_grafana:v2.6.0-2
           name: grafana
+          env:
+          resources:
+            # keep request = limit to keep this container in guaranteed class
+            limits:
+              cpu: 100m
+              memory: 100Mi
+            requests:
+              cpu: 100m
+              memory: 100Mi
           env:
             # This variable is required to setup templates in Grafana.
             - name: INFLUXDB_SERVICE_URL
@@ -116,37 +132,56 @@ spec:
   selector:
     k8s-app: heapster
 
-
-
 ---
 apiVersion: v1
 kind: ReplicationController
 metadata:
-  name: heapster-v10
+  name: heapster-v15
   namespace: kube-system
   labels:
     k8s-app: heapster
-    version: v10
+    version: v15
     kubernetes.io/cluster-service: "true"
 spec:
   replicas: 1
   selector:
     k8s-app: heapster
-    version: v10
+    version: v15
   template:
     metadata:
       labels:
         k8s-app: heapster
-        version: v10
+        version: v15
         kubernetes.io/cluster-service: "true"
     spec:
-      #serviceAccount: "heapster"
       containers:
-        - image: kubernetes/heapster:canary
+        - image: gcr.io/google_containers/heapster:v0.20.0-alpha12
           name: heapster
+          resources:
+            # keep request = limit to keep this container in guaranteed class
+            limits:
+              cpu: 100m
+              memory: 600Mi
+            requests:
+              cpu: 100m
+              memory: 600Mi
           command:
-          - /heapster
-          - --source=kubernetes:https://kubernetes.default
-          #- --source="cadvisor:external?cadvisorPort=4194"
-          - --sink=influxdb:http://monitoring-influxdb:8086
+            - /heapster
+            - --source=kubernetes.summary_api:''
+            - --sink=influxdb:http://monitoring-influxdb:8086
+            - --metric_resolution=60s
+        - image: gcr.io/google_containers/heapster:v0.20.0-alpha12
+          name: eventer
+          resources:
+            # keep request = limit to keep this container in guaranteed class
+            limits:
+              cpu: 100m
+              memory: 600Mi
+            requests:
+              cpu: 100m
+              memory: 600Mi
+          command:
+            - /eventer
+            - --source=kubernetes:''
+            - --sink=influxdb:http://monitoring-influxdb:8086
           
