@@ -9,6 +9,8 @@ limit nofile 32768 32768
 
 exec kube-controller-manager \
 	--address=0.0.0.0 \
+	--cloud-config="/etc/clc/clc.conf" \
+	--cloud-provider="clc" \
 	--kubeconfig=/srv/kubernetes/kubeconfig \
 	--service-account-private-key-file=/srv/kubernetes/server.key \
 	--v=1

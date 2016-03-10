@@ -50,3 +50,13 @@
     - kubelet
     - kube-proxy
     - kubectl
+
+- name: Create clc config directory
+  file:
+   path: "/etc/clc/"
+   state: directory
+
+- name: Add CLC cloud provider configuration.
+  template:
+    src: clc.config.j2
+    dest: /etc/clc/clc.conf
