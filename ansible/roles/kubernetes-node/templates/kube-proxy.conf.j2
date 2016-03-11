@@ -11,5 +11,4 @@ exec kube-proxy \
 	--bind-address=0.0.0.0\
 	--kubeconfig="/var/lib/kubelet/kubeconfig"\
 	--master={{ apiserver_endpoint }}\
-	--proxy-mode=iptables \
-	--resource-container=\"\"
+	--proxy-mode=iptables 
