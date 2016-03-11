@@ -1,3 +1,4 @@
+- include: configure_connections.yml
 
 - name: Create kubelet/kube-proxy config directory
   file:
