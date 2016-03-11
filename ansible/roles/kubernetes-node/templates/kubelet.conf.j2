@@ -7,13 +7,14 @@ limit nofile 20000 20000
 
 kill timeout 60
 
+# --cloud-config="/etc/clc/clc.conf" \
+# --cloud-provider="clc" \
+
 exec kubelet \
 	--address=0.0.0.0 \
 	--allow-privileged={{ allow_privileged }}\
 	--api-servers={{ apiserver_endpoint }} \
 	--cadvisor-port=4194 \
-	--cloud-config="/etc/clc/clc.conf" \
-	--cloud-provider="clc" \
 	--cluster-dns={{ cluster_dns_service_vip }} \
 	--cluster-domain={{ cluster_dns_domain }} \
 	--config="/etc/kubernetes/manifests" \

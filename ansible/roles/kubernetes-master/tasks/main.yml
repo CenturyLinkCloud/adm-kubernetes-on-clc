@@ -1,8 +1,3 @@
-- name: Add kube-apiserver service configuration.
-  template:
-    src: kube-apiserver.conf.j2
-    dest: /etc/init/kube-apiserver.conf
-
 - name: Create server pki cert directory
   file:
    path: "/srv/kubernetes"
@@ -25,6 +20,13 @@
 
 - set_fact:
     kube_admin_password: "{{ lookup('password', '{{ kube_config_local }}/admin_password.txt') }}"
+
+- name: Add kube-apiserver service configuration.
+  template:
+    src: kube-apiserver.conf.j2
+    dest: /etc/init/kube-apiserver.conf
+  notify:
+    - restart kube-apiserver
 
 - name: Add kube-apiserver password
   template:
