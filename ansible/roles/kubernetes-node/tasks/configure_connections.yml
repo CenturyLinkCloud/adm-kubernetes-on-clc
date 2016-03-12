@@ -1,0 +1,33 @@
+- debug: var=ansible_virtualization_role
+
+- name: guest virtualization role implies VM
+  set_fact:
+    clc_k8s_server_type: "physical"
+  when: ansible_virtualization_role is defined and ansible_virtualization_role == "host"
+
+- name: host virtualization role implies physical server
+  set_fact:
+    clc_k8s_server_type: "virtual_machine"
+  when: ansible_virtualization_role is defined and ansible_virtualization_role == "guest"
+
+- name: Absent virtualization role implies physical server
+  set_fact:
+    clc_k8s_server_type: "physical"
+  when: ansible_virtualization_role is not defined
+
+- debug: var=clc_k8s_server_type
+
+- block:
+
+  - name: sysctl -w net.netfilter.nf_conntrack_max=524288
+    sysctl:
+      name: "net.netfilter.nf_conntrack_max"
+      value: 524288
+      sysctl_set: yes
+      state: present
+      reload: yes
+
+  - name: echo 131072 > /sys/module/nf_conntrack/parameters/hashsize
+    shell: "echo 131072 > /sys/module/nf_conntrack/parameters/hashsize"
+
+  when: clc_k8s_server_type == "physical"

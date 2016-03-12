@@ -1,15 +1,82 @@
 ---
 apiVersion: v1
-kind: ServiceAccount
+kind: ReplicationController
 metadata:
-  name: influx-grafana
+  name: monitoring-influxdb-grafana-v3
   namespace: kube-system
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: heapster
-  namespace: kube-system
+  labels: 
+    k8s-app: influxGrafana
+    version: v3
+    kubernetes.io/cluster-service: "true"
+spec: 
+  replicas: 1
+  selector: 
+    k8s-app: influxGrafana
+    version: v3
+  template: 
+    metadata: 
+      labels: 
+        k8s-app: influxGrafana
+        version: v3
+        kubernetes.io/cluster-service: "true"
+    spec: 
+      containers: 
+        - image: gcr.io/google_containers/heapster_influxdb:v0.5
+          name: influxdb
+          resources:
+            # keep request = limit to keep this container in guaranteed class
+            limits:
+              cpu: 100m
+              memory: 500Mi
+            requests:
+              cpu: 100m
+              memory: 500Mi
+          ports: 
+            - containerPort: 8083
+              hostPort: 8083
+            - containerPort: 8086
+              hostPort: 8086
+          volumeMounts:
+          - name: influxdb-persistent-storage
+            mountPath: /data
+        - image: gcr.io/google_containers/heapster_grafana:v2.6.0-2
+          name: grafana
+          env:
+          resources:
+            # keep request = limit to keep this container in guaranteed class
+            limits:
+              cpu: 100m
+              memory: 100Mi
+            requests:
+              cpu: 100m
+              memory: 100Mi
+          env:
+            # This variable is required to setup templates in Grafana.
+            - name: INFLUXDB_SERVICE_URL
+              value: http://monitoring-influxdb:8086
+              # The following env variables are required to make Grafana accessible via
+              # the kubernetes api-server proxy. On production clusters, we recommend
+              # removing these env variables, setup auth for grafana, and expose the grafana
+              # service using a LoadBalancer or a public IP.
+            - name: GF_AUTH_BASIC_ENABLED
+              value: "false"
+            - name: GF_AUTH_ANONYMOUS_ENABLED
+              value: "true"
+            - name: GF_AUTH_ANONYMOUS_ORG_ROLE
+              value: Admin
+            - name: GF_SERVER_ROOT_URL
+              value: /api/v1/proxy/namespaces/kube-system/services/monitoring-grafana/
+          volumeMounts:
+          - name: grafana-persistent-storage
+            mountPath: /var
+
+      volumes:
+      - name: influxdb-persistent-storage
+        emptyDir: {}
+      - name: grafana-persistent-storage
+        emptyDir: {}
+        
+
 ---
 apiVersion: v1
 kind: Service
@@ -47,41 +114,7 @@ spec:
       targetPort: 8086
   selector:
     k8s-app: influxGrafana
----
-apiVersion: v1
-kind: ReplicationController
-metadata:
-  name: heapster-v10
-  namespace: kube-system
-  labels:
-    k8s-app: heapster
-    version: v10
-    kubernetes.io/cluster-service: "true"
-spec:
-  replicas: 1
-  selector:
-    k8s-app: heapster
-    version: v10
-  template:
-    metadata:
-      labels:
-        k8s-app: heapster
-        version: v10
-        kubernetes.io/cluster-service: "true"
-    spec:
-      #serviceAccount: "heapster"
-      containers:
-        - image: gcr.io/google_containers/heapster:v0.18.2
-          name: heapster
-          resources:
-            limits:
-              cpu: 600m
-              memory: 900Mi
-          command:
-          - /heapster
-          - --source=kubernetes:https://kubernetes.default
-          #- --source="cadvisor:external?cadvisorPort=4194"
-          - --sink=influxdb:http://monitoring-influxdb:8086
+
             
 ---
 kind: Service
@@ -103,70 +136,52 @@ spec:
 apiVersion: v1
 kind: ReplicationController
 metadata:
-  name: monitoring-influxdb-grafana-v2
+  name: heapster-v15
   namespace: kube-system
   labels:
-    k8s-app: influxGrafana
-    version: v2
+    k8s-app: heapster
+    version: v15
     kubernetes.io/cluster-service: "true"
 spec:
   replicas: 1
   selector:
-    k8s-app: influxGrafana
-    version: v2
+    k8s-app: heapster
+    version: v15
   template:
     metadata:
       labels:
-        k8s-app: influxGrafana
-        version: v2
+        k8s-app: heapster
+        version: v15
         kubernetes.io/cluster-service: "true"
     spec:
-      #serviceAccount: "influx-grafana"
       containers:
-        - image: gcr.io/google_containers/heapster_influxdb:v0.4
-          name: influxdb
+        - image: gcr.io/google_containers/heapster:v0.20.0-alpha12
+          name: heapster
           resources:
-            limits:
-              cpu: 900m
-              memory: 900Mi
-          ports:
-            - containerPort: 8083
-              hostPort: 8083
-            - containerPort: 8086
-              hostPort: 8086
-          volumeMounts:
-          - name: influxdb-persistent-storage
-            mountPath: /data
-        - image: beta.gcr.io/google_containers/heapster_grafana:v2.1.1
-          name: grafana
-          env:
-          resources:
+            # keep request = limit to keep this container in guaranteed class
             limits:
               cpu: 100m
-              memory: 100Mi
-          env:
-            # This variable is required to setup templates in Grafana.
-            - name: INFLUXDB_SERVICE_URL
-              value: http://monitoring-influxdb:8086
-              # The following env variables are required to make Grafana accessible via
-              # the kubernetes api-server proxy. On production clusters, we recommend
-              # removing these env variables, setup auth for grafana, and expose the grafana
-              # service using a LoadBalancer or a public IP.
-            - name: GF_AUTH_BASIC_ENABLED
-              value: "false"
-            - name: GF_AUTH_ANONYMOUS_ENABLED
-              value: "true"
-            - name: GF_AUTH_ANONYMOUS_ORG_ROLE
-              value: Admin
-            - name: GF_SERVER_ROOT_URL
-              value: /api/v1/proxy/namespaces/kube-system/services/monitoring-grafana/
-          volumeMounts:
-          - name: grafana-persistent-storage
-            mountPath: /var
-
-      volumes:
-      - name: influxdb-persistent-storage
-        emptyDir: {}
-      - name: grafana-persistent-storage
-        emptyDir: {}
-
+              memory: 600Mi
+            requests:
+              cpu: 100m
+              memory: 600Mi
+          command:
+            - /heapster
+            - --source=kubernetes.summary_api:''
+            - --sink=influxdb:http://monitoring-influxdb:8086
+            - --metric_resolution=60s
+        - image: gcr.io/google_containers/heapster:v0.20.0-alpha12
+          name: eventer
+          resources:
+            # keep request = limit to keep this container in guaranteed class
+            limits:
+              cpu: 100m
+              memory: 600Mi
+            requests:
+              cpu: 100m
+              memory: 600Mi
+          command:
+            - /eventer
+            - --source=kubernetes:''
+            - --sink=influxdb:http://monitoring-influxdb:8086
+          

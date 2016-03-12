@@ -5,6 +5,42 @@ function exit_message() {
     exit 1
 }
 
+# Usage info
+function show_help() {
+cat << EOF
+Usage: ${0##*/} [OPTIONS]
+Install the kubectl utility and write the configuration file for it/
+
+Environment variables
+  CLC_CLUSTER_NAME (may be set with command-line option)
+
+Arguments:
+     -h (--help)                   display this help and exit
+     -c= (--clc_cluster_name=)     set the name of the cluster, CLC_CLUSTER_NAME
+EOF
+}
+
+for i in "$@"
+do
+case $i in
+    -h|--help)
+    show_help && exit 0
+    shift # past argument=value
+    ;;
+    -c=*|--clc_cluster_name=*)
+    CLC_CLUSTER_NAME="${i#*=}"
+    shift # past argument=value
+    ;;
+    *)
+    echo "Unknown option: $1"
+    echo
+    show_help
+    exit 1
+    ;;
+esac
+done
+
+
 if [ -z ${CLC_CLUSTER_NAME+null_if_undefined} ]
 then
   exit_message "please define environment variable CLC_CLUSTER_NAME"

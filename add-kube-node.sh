@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 # Add node to existing CLC kubernetes cluster
 
@@ -23,22 +23,21 @@ function exit_message() {
     exit 1
 }
 
+# set count=1 as default
+minion_count=1
 
 for i in "$@"
 do
 case $i in
     -h|--help)
     show_help && exit 0
-    shift # past argument=value
     ;;
     -c=*|--clc_cluster_name=*)
     CLC_CLUSTER_NAME="${i#*=}"
-    extra_args="$extra_args clc_cluster_name=$CLC_CLUSTER_NAME"
     shift # past argument=value
     ;;
     -m=*|--minion_count=*)
     minion_count="${i#*=}"
-    extra_args="$extra_args minion_count=$minion_count"
     shift # past argument=value
     ;;
     *)
@@ -75,11 +74,20 @@ cd ansible
 ansible-playbook create-minion-hosts.yml \
   -e add_nodes=1 \
   -e minion_count=$minion_count \
-  -e config_vars=${CLC_CLUSTER_HOME}/config/minion_config.yml
+  -e config_vars_master=${CLC_CLUSTER_HOME}/config/master_config.yml \
+  -e config_vars_minion=${CLC_CLUSTER_HOME}/config/minion_config.yml 
 
 #### verify access
+echo ansible -i $hosts_dir   -m shell -a uptime all
 ansible -i $hosts_dir   -m shell -a uptime all
 
+echo $hosts_dir
 #### Part3
 echo "Part3 - Setting up kubernetes"
-ansible-playbook -i $hosts_dir  -e config_vars=${config_dir}/minion_config.yml   install_kubernetes.yml  --limit minion
+ansible-playbook install_kubernetes.yml -i $hosts_dir \
+   -e config_vars_master=${CLC_CLUSTER_HOME}/config/master_config.yml \
+   -e config_vars_minion=${CLC_CLUSTER_HOME}/config/minion_config.yml \
+   --limit kube-node 
+   
+   
+   

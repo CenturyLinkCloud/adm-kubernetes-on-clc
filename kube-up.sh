@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 # deploy k8s cluster on clc
 #
@@ -22,8 +22,11 @@ function show_help() {
 cat << EOF
 Usage: ${0##*/} [OPTIONS]
 Create servers in the CenturyLinkCloud environment and initialize a Kubernetes cluster
-Environment variables CLC_V2_API_USERNAME and CLC_V2_API_PASSWD must be set in
-order to access the CenturyLinkCloud API
+Environment variables
+  CLC_CLUSTER_NAME (may be set with command-line option)
+  CLC_V2_API_USERNAME (required)
+  CLC_V2_API_PASSWD (required)
+
 
 Most options (both short and long form) require arguments, and must include "="
 between option name and option value. _--help_ and _--etcd_separate_cluster_ do
@@ -35,7 +38,7 @@ not take arguments
      -m= (--minion_count=)         number of kubernetes minion nodes
      -mem= (--vm_memory=)          number of GB ram for each minion
      -cpu= (--vm_cpu=)             number of virtual cps for each minion node
-     -t= (--minion_type=)          standard -> VM (default), bareMetal -> physical]
+     -t= (--minion_type=)          "standard" [default, a VM] or "bareMetal" [a physical server]
      -phyid= (--server_config_id=) if obtaining a bareMetal server, this configuration id
                                    must be set to one of:
                                       physical_server_20_core
@@ -48,6 +51,9 @@ EOF
 
 function exit_message() {
     echo "ERROR: $1" >&2
+    echo
+    echo
+    show_help
     exit 1
 }
 
@@ -131,7 +137,7 @@ if [[ ${minion_type} == "standard" ]]
 then
   if [[ ${server_config_id} != "default" ]]
   then
-    exit_message "Server configuration of \"${server_config_id}\" is not compatible with ${minion_type} VM, use \"default\""
+    exit_message "server_config_id=\"${server_config_id}\" is not compatible with minion_type=\"${minion_type}\""
   fi
 elif [[ ${minion_type} == "bareMetal" ]]
 then
@@ -267,7 +273,8 @@ ansible-playbook -i ${CLC_CLUSTER_HOME}/hosts install_etcd.yml \
 #### Part3
 echo "Part3 - Setting up kubernetes"
 ansible-playbook -i ${CLC_CLUSTER_HOME}/hosts install_kubernetes.yml \
-    -e config_vars=${CLC_CLUSTER_HOME}/config/master_config.yml
+    -e config_vars_master=${CLC_CLUSTER_HOME}/config/master_config.yml \
+    -e config_vars_minion=${CLC_CLUSTER_HOME}/config/minion_config.yml \
 
 #### Part4
 echo "Part4 - Installing standard addons"

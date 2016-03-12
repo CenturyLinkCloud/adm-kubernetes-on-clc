@@ -9,15 +9,15 @@
 
   vars_files:
     - vars.yml
-    - "{{ config_vars }}"
+    - "{{ config_vars_master }}"
   vars:
     - clc_cluster_home: "{{ lookup('env','HOME') }}/.clc_kube/{{ clc_cluster_name }}"
     - cert_dir: "{{ clc_cluster_home }}/pki"
 
   pre_tasks:
     - name: include vars for master configuration
-      include_vars: "{{ config_vars }}"
-      when: config_vars is defined
+      include_vars: "{{ config_vars_master }}"
+      when: config_vars_master is defined
 
   roles:
 
@@ -35,7 +35,7 @@
   gather_facts: True
   vars_files:
     - vars.yml
-    - "{{ config_vars }}"
+    - "{{ config_vars_master }}"
   vars:
     - apiserver_endpoint: https://{{ ansible_default_ipv4.address }}:6443
 
@@ -55,9 +55,6 @@
     - name: Set etcd url for cluster in group "{{ etcd_group }}"
       set_fact:
         etcd_endpoint: "{% for host in groups[etcd_group] %}http://{{ hostvars[host]['ansible_default_ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
-    - name: include vars for master configuration
-      include_vars: "{{ config_vars }}"
-      when: config_vars is defined
 
   roles:
     - resolv
@@ -89,7 +86,7 @@
 
   vars_files:
     - vars.yml
-    - "{{ config_vars }}"
+    - "{{ config_vars_minion  }}"
   vars:
     - clc_cluster_home: "{{ lookup('env','HOME') }}/.clc_kube/{{ clc_cluster_name }}"
     - cert_dir: "{{ clc_cluster_home }}/pki"
@@ -99,10 +96,9 @@
     - kubecfg_key_b64: "{{ lookup('file', cert_dir+'/kubecfg.key') | b64encode }}"
 
   pre_tasks:
-
     - name: include vars for minion configuration
-      include_vars: "{{ config_vars }}"
-      when: config_vars is defined
+      include_vars: "{{ config_vars_minion }}"
+      when: config_vars_minion is defined
 
     - set_fact:
         master_ip: "{{ hostvars[ item ].ansible_default_ipv4.address }}"
@@ -111,6 +107,11 @@
 
     - set_fact:
         apiserver_endpoint: "https://{{ master_ip }}:6443"
+
+    - name: set max pod value if bareMetal server
+      set_fact:
+        kubelet_max_pods: 100
+      when: (minion_type is defined) and (minion_type == 'bareMetal')
 
   roles:
     - resolv

@@ -34,3 +34,13 @@
     name: docker
     enabled: "yes"
     state: started
+
+- name: update kernel headers
+  apt:
+    name: linux-headers-{{ ansible_kernel }}
+    update_cache: yes
+
+- name: Install sysdig package.
+  apt:
+    name: sysdig
+    state: present

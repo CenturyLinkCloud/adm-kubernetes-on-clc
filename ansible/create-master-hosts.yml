@@ -24,9 +24,14 @@
     - async_poll: 5
 
   pre_tasks:
-    - name: include vars for master configuration
+    - name: include vars for configuration
       include_vars: "{{ config_vars }}"
       when: config_vars is defined
+
+    - name: include master-specific vars for configuration
+      include_vars: "{{ config_vars_master }}"
+      when: config_vars_master is defined
+
 
   roles:
     - { role: clc-provisioning, when: skip_master == False }

@@ -1,14 +1,12 @@
 # Kubernetes on CenturyLink Cloud
-These scripts handle the creation, deletion and expansion of kubernetes clusters on CenturyLink Cloud. 
+These scripts handle the creation, deletion and expansion of kubernetes clusters on CenturyLink Cloud.
 
-You can accomplish all these tasks with a simple single command. And, for those interested in what's under the covers, we used Ansible to perform these tasks and we have made these Ansible playbooks available as well. 
+You can accomplish all these tasks with a simple single command. And, for those interested in what's under the covers, we used Ansible to perform these tasks and we have made these Ansible playbooks available as well.
 
 ## Find Help
 If you run into any problems or want help with anything, we are here to help. Reach out to use via any of the following ways:
 - Submit a github issue
-- or
 - Send an email to kubernetes AT ctl DOT io
-- or
 - Visit http://info.ctl.io/kubernetes
 
 ## Clusters of VMs or Physical Servers, your choice.
@@ -19,13 +17,12 @@ If you run into any problems or want help with anything, we are here to help. Re
 
 ## Requirements
 The requirements to run this script are:
-- A linux host (tested on ubuntu and OSX)
-- ansible _version 2.0_ or newer.  If on OSX, try installing with `brew install ansible`.
-- python
-- pip
+- A linux administrative host (tested on ubuntu and OSX)
+- python 2 (tested on 2.7.11)
+  - pip (installed with python as of 2.7.9)
 - git
 - A CenturyLink Cloud account with rights to create new hosts
-- An active VPN connection to the centurylink cloud from your linux/ansible host
+- An active VPN connection to the CenturyLink Cloud from your linux host
 
 ## Script Installation
 After you have all the requirements met, please follow these instructions to install this script.
@@ -36,10 +33,13 @@ After you have all the requirements met, please follow these instructions to ins
 git clone https://github.com/CenturyLinkCloud/adm-kubernetes-on-clc
 ```
 
-2) Install the CenturyLink Cloud SDK and Ansible Modules
+2) Install all requirements, including
+  * Ansible
+  * CenturyLink Cloud SDK
+  * Ansible Modules
 
 ```
-sudo pip install -r requirements.txt
+sudo pip install -r ansible/requirements.txt
 ```
 
 3) Create the credentials file from the template and use it to set your ENV variables
@@ -50,11 +50,17 @@ vi ansible/credentials.sh
 source ansible/credentials.sh
 
 ```
-4) Make sure the computer you are working on has access to the CenturyLink Cloud network. This is done by using a VM inside the CenturyLink Cloud network or having an active VPN connection to the CenturyLink Cloud network. To find out how to configure the VPN connection, [visit here](https://www.ctl.io/knowledge-base/network/how-to-configure-client-vpn/)
+
+4) Make sure the computer you are working on has access to the CenturyLink Cloud
+network. This is done by using a VM inside the CenturyLink Cloud network or
+having an active VPN connection to the CenturyLink Cloud network. To find out
+how to configure the VPN connection, [visit here](https://www.ctl.io/knowledge-base/network/how-to-configure-client-vpn/)
 
 
-### Script Installation Example: Ubuntu 14 Walkthrough
-If you use an ubuntu 14, for your convenience we have provided a step by step guide to install the requirements and install the script.
+#### Script Installation Example: Ubuntu 14 Walkthrough
+
+If you use an ubuntu 14, for your convenience we have provided a step by step
+guide to install the requirements and install the script.
 
 ```
   # system
@@ -79,17 +85,27 @@ If you use an ubuntu 14, for your convenience we have provided a step by step gu
 
 
 ## Cluster Creation
-To create a new Kubernetes cluster, simply run the kube-up.sh script. A complete list of script options and some examples are listed below.
+
+To create a new Kubernetes cluster, simply run the kube-up.sh script. A complete
+list of script options and some examples are listed below.
 
 ```
+CLC_CLUSTER_NAME=[name of kubernetes cluster]
 cd ./adm-kubernetes-on-clc
-bash kube-up.sh -c="name_of_kubernetes_cluster"
+bash kube-up.sh -c="$CLC_CLUSTER_NAME"
 ```
 
-It takes about 15 minutes to create the cluster. Once the script completes, it will output some commands that will help you setup kubectl on your machine to point to the new cluster. 
+It takes about 15 minutes to create the cluster. Once the script completes, it
+will output some commands that will help you setup kubectl on your machine to
+point to the new cluster.
+
+When the cluster creation is complete, the configuration files for it are stored
+locally on your administrative host, in the directory
+
+> CLC_CLUSTER_HOME=$HOME/.clc_kube/$CLC_CLUSTER_NAME/
 
 
-### Cluster Creation: Script Options
+#### Cluster Creation: Script Options
 
 ```
 Usage: kube-up.sh [OPTIONS]
@@ -116,14 +132,18 @@ between option name and option value.
 ```
 
 ## Cluster Expansion
-To expand an existing Kubernetes cluster, simply run the add-kube-node.sh script. A complete list of script options and some examples are listed below. This script must be run from the same hose that created the cluster (or a host that has the cluster artifact files stored in ~/.clc_kube/$cluster_name). 
+
+To expand an existing Kubernetes cluster, run the add-kube-node.sh
+script. A complete list of script options and some examples are listed below.
+This script must be run from the same hose that created the cluster (or a host
+that has the cluster artifact files stored in ~/.clc_kube/$cluster_name).
 
 ```
 cd ./adm-kubernetes-on-clc
 bash add-kube-node.sh -c="name_of_kubernetes_cluster" -m=2
 ```
 
-### Cluster Expansion: Script Options
+#### Cluster Expansion: Script Options
 
 ```
 Usage: add-kube-node.sh [OPTIONS]
@@ -136,22 +156,22 @@ order to access the CenturyLinkCloud API
      -h (--help)                   display this help and exit
      -c= (--clc_cluster_name=)     set the name of the cluster, as used in CLC group names
      -m= (--minion_count=)         number of kubernetes minion nodes to add
-     
+
 ```
 
 ## Cluster Deletion
-There are two ways to delete an existing cluster: 
+There are two ways to delete an existing cluster:
 
-1) Use our python script: 
+1) Use our python script:
 
 ```
 python delete_cluster.py --cluster=clc_cluster_name --datacenter=DC1
 
 ```
 
-2) Use the CenturyLink Cloud UI. To delete a cluster, log into the CenturyLink Cloud control portal and delete the
-parent server group that contains the Kubernetes Cluster. We hope to add a
-scripted option to do this soon.
+2) Use the CenturyLink Cloud UI. To delete a cluster, log into the CenturyLink
+Cloud control portal and delete the parent server group that contains the
+Kubernetes Cluster. We hope to add a scripted option to do this soon.
 
 ## Examples
 Create a cluster with name of k8s_1, 1 master node and 3 worker minions (on physical machines), in VA1
@@ -178,7 +198,7 @@ Create a cluster with name of k8s_3, 1 master node, and 10 worker minions (on VM
 We configue the Kubernetes cluster with the following features:
 
 * KubeDNS: DNS resolution and service discovery
-* Heapster/InfluxDB: For metric collection. Needed for Grafana and auto-scaling. 
+* Heapster/InfluxDB: For metric collection. Needed for Grafana and auto-scaling.
 * Grafana: Kubernetes/Docker metric dashboard
 * KubeUI: Simple web interface to view kubernetes state
 * Kube Dashboard: New web interface to interact with your cluster
@@ -193,23 +213,27 @@ We use the following to create the kubernetes cluster:
 
 ## Optional add-ons
 
-* Logging: We offer an integrated centralized logging ELK platform so that all kubernetes and docker logs get sent to the ELK stack. To install the ELK stack and configure kubernetes to send logs to it, follow this documentation: [log aggregation](log_aggregration.md). Note: We don't install this by default as the footprint isn't trivial. 
+* Logging: We offer an integrated centralized logging ELK platform so that all
+  kubernetes and docker logs get sent to the ELK stack. To install the ELK stack
+  and configure kubernetes to send logs to it, follow this documentation: [log
+  aggregation](log_aggregration.md). Note: We don't install this by default as
+  the footprint isn't trivial.
 
 ## Cluster management
 
 The most widely used tool for managing a kubernetes cluster is the command-line
 utility _kubectl_.  If you do not already have a copy of this binary on your
-administrative machine, you may run the script _install-kubectl.sh_ which will
+administrative machine, you may run the script _install_kubectl.sh_ which will
 download it and install it in _/usr/bin/local_.
 
 The script requires that the environment variable CLC_CLUSTER_NAME be defined
 
 _install_kubectl.sh_ also writes a configuration file which will embed the necessary
 authentication certificates for the particular cluster.  The configuration file is
-written to the local directory, named *kubectl_${CLC_CLUSTER_NAME}_config*
+written to the  ${CLC_CLUSTER_HOME}/kube directory
 
 ```
-export KUBECONFIG=kubectl_${CLC_CLUSTER_NAME}_config
+export KUBECONFIG=${CLC_CLUSTER_HOME}/kube/config
 kubectl version
 kubectl cluster-info
 ```
@@ -228,22 +252,26 @@ distributed with OSX
 
 ### Accessing the cluster with a browser
 
-We install two UIs on kubernetes. The orginal KubeUI and the newer kube dashboard. When you create a cluster, the script should output URLs for these interfaces like this:
+We install two UIs on kubernetes. The orginal KubeUI and the newer kube
+dashboard. When you create a cluster, the script should output URLs for these
+interfaces like this:
 
 KubeUI is running at https://${MASTER_IP}:6443/api/v1/proxy/namespaces/kube-system/services/kube-ui
 kubernetes-dashboard is running at https://${MASTER_IP}:6443/api/v1/proxy/namespaces/kube-system/services/kubernetes-dashboard
 
-Note on Authentication to the UIs: The cluster is set up to use basic authentication for the user _admin_.  
-Hitting the url at https://${MASTER_IP}:6443 will require accepting the self-
-signed certificate from the apiserver, and then presenting the admin password
-found at _${CLC_CLUSTER_HOME}/kube/admin_password.txt_
+Note on Authentication to the UIs: The cluster is set up to use basic
+authentication for the user _admin_.   Hitting the url at
+https://${MASTER_IP}:6443 will require accepting the self-signed certificate
+from the apiserver, and then presenting the admin password written to file at
+
+> _${CLC_CLUSTER_HOME}/kube/admin_password.txt_
 
 
 ### Configuration files
 
-Various configuration files are written into the home directory under
+Various configuration files are written into the home directory *CLC_CLUSTER_HOME* under
 _.clc_kube/${CLC_CLUSTER_NAME}_ in several subdirectories. You can use these files
-to access the cluster from machines other than where you created the cluster from. 
+to access the cluster from machines other than where you created the cluster from.
 
 * _config/_: ansible variable files containing parameters describing the master and minion hosts
 * _hosts/_: hosts files listing access information for the ansible playbooks
@@ -277,12 +305,15 @@ without the need for client certificates in your browser.
 
 
 ## What Kubernetes features do not work on CenturyLink Cloud
-- At this time, there is no support services of the type 'loadbalancer'. We are actively working on this and hope to publish the changes soon.
-- At this time, there is no support for persistent storage volumes provided by CenturyLink Cloud. However, customers can bring their own persistent storage offering. We ourselves use Gluster. 
+
+- At this time, there is no support services of the type 'loadbalancer'. We are
+  actively working on this and hope to publish the changes soon.
+- At this time, there is no support for persistent storage volumes provided by
+  CenturyLink Cloud. However, customers can bring their own persistent storage
+  offering. We ourselves use Gluster.
 
 ## Ansible Files
 If you want more information about our ansible files, please [read this file](ansible/README.md)
 
 ## License
 The project is licensed under the [Apache License v2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
-

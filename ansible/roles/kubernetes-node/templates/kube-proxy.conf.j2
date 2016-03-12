@@ -1,15 +1,15 @@
-description "kube-proxy service"
-author "mark ramach"
+description "kubernetes kube-proxy"
 
-script
+start on runlevel [2345]
+stop on runlevel [!2345]
 
-	KUBE_PROXY_OPTS="\
-    --bind-address=0.0.0.0\
-    --kubeconfig="/var/lib/kubelet/kubeconfig"\
-    --master={{ apiserver_endpoint }}\
-    --resource-container=\"\"\
-		"
+limit nofile 20000 20000
 
-	exec kube-proxy $KUBE_PROXY_OPTS > /var/log/kube-proxy.log
+kill timeout 60
 
-end script
+exec kube-proxy \
+	--bind-address=0.0.0.0\
+	--kubeconfig="/var/lib/kubelet/kubeconfig"\
+	--master={{ apiserver_endpoint }}\
+	--proxy-mode=iptables \
+	--resource-container=\"\"

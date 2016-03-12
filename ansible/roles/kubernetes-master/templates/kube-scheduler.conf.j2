@@ -1,13 +1,11 @@
 description "kube-scheduler service"
-author "mark ramach"
 
-script
+start on runlevel [2345]
+stop on runlevel [!2345]
 
-	KUBE_SCHEDULER_OPTS="\
+kill timeout 60
+
+exec kube-scheduler \
 	--address=0.0.0.0 \
 	--kubeconfig=/srv/kubernetes/kubeconfig \
-	--v=1 \
-	"
-  exec kube-scheduler $KUBE_SCHEDULER_OPTS > /var/log/kube-scheduler.log
-  
-end script
+	--v=1
