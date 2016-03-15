@@ -162,7 +162,7 @@ then
 else
 
   echo "Creating Kubernetes Cluster on CenturyLink Cloud"
-  echo ""
+  echo "Writing local configuration files"
 
   cat <<CONFIG > ${CLC_CLUSTER_HOME}/config/master_config.yml
 clc_cluster_name: ${CLC_CLUSTER_NAME}
@@ -178,6 +178,24 @@ skip_minion: True
 async_time: 7200
 async_poll: 5
 CONFIG
+
+if [ "${etcd_group}" == "etcd" ]
+then
+  cat <<CONFIG > ${CLC_CLUSTER_HOME}/config/etcd_config.yml
+clc_cluster_name: ${CLC_CLUSTER_NAME}
+server_group: ${etcd_group}
+etcd_group: ${etcd_group}
+server_group_tag: ${etcd_group}
+datacenter: ${datacenter}
+server_count: 3
+server_config_id: default
+server_memory: 2
+server_cpu: 1
+skip_minion: True
+async_time: 7200
+async_poll: 5
+CONFIG
+fi
 
   cat <<CONFIG > ${CLC_CLUSTER_HOME}/config/minion_config.yml
 clc_cluster_name: ${CLC_CLUSTER_NAME}
@@ -226,7 +244,7 @@ CONFIG
   else
     echo "ETCD will be installed on 3 separate VMs not part of k8s cluster"
     { ansible-playbook create-etcd-hosts.yml  \
-        -e config_vars=${CLC_CLUSTER_HOME}/config/master_config.yml;
+        -e config_vars=${CLC_CLUSTER_HOME}/config/etcd_config.yml;
     } &
     pids="$pids $!"
   fi

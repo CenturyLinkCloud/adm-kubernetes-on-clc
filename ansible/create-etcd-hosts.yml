@@ -6,12 +6,10 @@
   tasks:
     - fail: msg="This playbook requires Ansible 2.0 or greater (found {{ ansible_version.full }})."
       when: "{{ ansible_version|version_compare(2.0,'<') }}"
-    - fail: msg="The clc_cluster_name variable must be set"
-      when: clc_cluster_name is undefined
 
 - name: Get machine resources for etcd
   hosts: localhost
-  gather_facts: False
+  gather_facts: True
   connection: local
   vars:
     - server_group: etcd
@@ -22,6 +20,15 @@
     - skip_etcd: False
     - async_time: 7200
     - async_poll: 5
+
+  pre_tasks:
+    - name: include vars for configuration
+      include_vars: "{{ config_vars }}"
+      when: config_vars is defined
+
+    - name: include master-specific vars for configuration
+      include_vars: "{{ config_vars_master }}"
+      when: config_vars_master is defined
 
   roles:
     - { role: clc-provisioning, when: skip_etcd == False }
