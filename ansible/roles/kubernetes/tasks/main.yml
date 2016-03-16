@@ -1,5 +1,12 @@
 - name: Download kubernetes release.
-  get_url: url={{ kubernetes_url }} dest=/tmp/kubernetes.tar.gz
+  get_url:
+    url: "{{ kubernetes_url }}"
+    dest: /tmp/kubernetes.tar.gz
+    force: yes
+  register: get_url_request
+  until: "'OK' in get_url_request.msg"
+  retries: 5
+  delay: 10
 
 - name: Unarchive kubernetes release.
   unarchive: src=/tmp/kubernetes.tar.gz dest=/var/lib/ copy=false group=root owner=root mode=755

@@ -1,8 +1,26 @@
 - name: Download flannel release.
-  get_url: url={{ flannel_url }} dest=/tmp/{{ flannel_version}}.tar.gz validate_certs=no
-    
+  get_url:
+    url: "{{ flannel_url }}"
+    dest: "/tmp/{{ flannel_version}}.tar.gz"
+    validate_certs: no
+  register: get_url_request
+  until: "'OK' in get_url_request.msg"
+  retries: 5
+  delay: 10
+
 - name: Unarchive flannel release.
-  unarchive: src=/tmp/{{ flannel_version }}.tar.gz dest=/var/lib/ copy=false group=root owner=root mode=755
-  
+  unarchive:
+    src: "/tmp/{{ flannel_version }}.tar.gz"
+    dest: /var/lib/
+    copy: false
+    group: root
+    owner: root
+    mode: 755
+
 - name: Create symbolic links to flanneld binary.
-  file: src=/var/lib/{{ flannel_version }}/flanneld dest=/usr/bin/flanneld owner=root group=root state=link
+  file:
+    src: "/var/lib/{{ flannel_version }}/flanneld"
+    dest: /usr/bin/flanneld
+    owner: root
+    group: root
+    state: link
