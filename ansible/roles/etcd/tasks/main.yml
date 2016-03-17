@@ -3,7 +3,7 @@
 - name: download etcd
   get_url: url={{etcd_tgz_url}} dest=/tmp/{{etcd_tgz}}
   register: get_url_request
-  until: "'OK' in get_url_request.msg"
+  until: "'OK' in get_url_request.msg or 'file already exists' == get_url_request.msg"
   retries: 5
   delay: 10
 

@@ -4,7 +4,7 @@
     dest: "/tmp/{{ flannel_version}}.tar.gz"
     validate_certs: no
   register: get_url_request
-  until: "'OK' in get_url_request.msg"
+  until: "'OK' in get_url_request.msg or 'file already exists' == get_url_request.msg"
   retries: 5
   delay: 10
 
