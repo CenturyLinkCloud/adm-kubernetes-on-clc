@@ -39,13 +39,13 @@
     dest: /srv/kubernetes/kubeconfig
   notify:
     - restart kube-apiserver
+    - restart kube-controller-manager
 
 - name: Start kube-apiserver service.
   service:
     name: kube-apiserver
     state: running
     enabled: True
-
 
 - name: Add kube-controller-manager service configuration.
   template:
