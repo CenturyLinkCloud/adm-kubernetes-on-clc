@@ -1,5 +1,5 @@
 [Global]
 username = {{ lookup('env','CLC_V2_API_USERNAME') }}
-password = {{ lookup('env','CLC_V2_API_PASSWD') }}
+password-base64 = {{ lookup('env','CLC_V2_API_PASSWD') | b64encode }}
 datacenter = {{ datacenter }}
 alias =
