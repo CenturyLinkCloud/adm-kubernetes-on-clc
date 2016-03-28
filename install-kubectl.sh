@@ -70,7 +70,7 @@ fi
 KUBECTL=$(which kubectl)
 if [ -z "$KUBECTL" ]
 then
-  version=v1.1.7
+  version=v1.2.0
   arch=$(uname -s | tr '[:upper:]' '[:lower:]')  # linux|darwin
   url="https://storage.googleapis.com/kubernetes-release/release/${version}/bin/${arch}/amd64/kubectl"
   echo "No kubectl found, installing kubectl $version $arch to /usr/local/bin"
