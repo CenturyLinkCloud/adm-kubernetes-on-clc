@@ -39,7 +39,7 @@ git clone https://github.com/CenturyLinkCloud/adm-kubernetes-on-clc
   * Ansible Modules
 
 ```
-sudo pip install -r ansible/requirements.txt
+sudo pip install -r ./requirements.txt
 ```
 
 3) Create the credentials file from the template and use it to set your ENV variables
@@ -65,7 +65,7 @@ guide to install the requirements and install the script.
 ```
   # system
   apt-get update
-  apt-get install -y git python python-crypto
+  apt-get install -y git python python-dev python-crypto
   curl -O https://bootstrap.pypa.io/get-pip.py
   python get-pip.py
 

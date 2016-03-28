@@ -1,6 +1,6 @@
 
 - name: install elasticsearch service
-  hosts: master[0]
+  hosts: kube-master[0]
   vars:
     k8s_apps:
       - es-service-account
@@ -10,7 +10,7 @@
     - kubernetes-manifest
 
 - name: install elasticsearch master nodes
-  hosts: master[0]
+  hosts: kube-master[0]
   vars:
     k8s_apps:
       - es-rc
@@ -25,7 +25,7 @@
     - kubernetes-manifest
 
 - name: install elasticsearch data nodes
-  hosts: master[0]
+  hosts: kube-master[0]
   vars:
     k8s_apps:
       - es-rc
@@ -40,7 +40,7 @@
     - kubernetes-manifest
 
 - name: install elasticsearch client nodes
-  hosts: master[0]
+  hosts: kube-master[0]
   vars:
     k8s_apps:
       - es-rc
@@ -56,7 +56,7 @@
 
 
 - name: install logging services, configure logstash template
-  hosts: master[0]
+  hosts: kube-master[0]
   vars:
     k8s_apps:
       - es-logging-svc
@@ -66,7 +66,7 @@
     - kubernetes-manifest
 
 - name: start aggregating logs with a fluentd daemonset
-  hosts: master[0]
+  hosts: kube-master[0]
   vars:
     k8s_apps:
       - fluentd-es
