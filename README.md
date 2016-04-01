@@ -35,11 +35,11 @@ git clone https://github.com/CenturyLinkCloud/adm-kubernetes-on-clc
 
 2) Install all requirements, including
   * Ansible
-  * CenturyLink Cloud SDK
+  * [CenturyLink Cloud SDK](https://github.com/CenturyLinkCloud/clc-python-sdk)
   * Ansible Modules
 
 ```
-sudo pip install -r ansible/requirements.txt
+sudo pip install -r requirements.txt
 ```
 
 3) Create the credentials file from the template and use it to set your ENV variables
@@ -90,7 +90,7 @@ To create a new Kubernetes cluster, simply run the kube-up.sh script. A complete
 list of script options and some examples are listed below.
 
 ```
-CLC_CLUSTER_NAME=[name of kubernetes cluster]
+export CLC_CLUSTER_NAME=[name of kubernetes cluster]
 cd ./adm-kubernetes-on-clc
 bash kube-up.sh -c="$CLC_CLUSTER_NAME"
 ```
