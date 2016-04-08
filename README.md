@@ -165,7 +165,7 @@ There are two ways to delete an existing cluster:
 1) Use our python script:
 
 ```
-python delete_cluster.py --cluster=clc_cluster_name --datacenter=DC1
+python delete_cluster.py --clc_cluster_name=clc_cluster_name --datacenter=DC1
 
 ```
 
