@@ -35,11 +35,11 @@ git clone https://github.com/CenturyLinkCloud/adm-kubernetes-on-clc
 
 2) Install all requirements, including
   * Ansible
-  * CenturyLink Cloud SDK
+  * [CenturyLink Cloud SDK](https://github.com/CenturyLinkCloud/clc-python-sdk)
   * Ansible Modules
 
 ```
-sudo pip install -r ./requirements.txt
+sudo pip install -r requirements.txt
 ```
 
 3) Create the credentials file from the template and use it to set your ENV variables
@@ -65,7 +65,7 @@ guide to install the requirements and install the script.
 ```
   # system
   apt-get update
-  apt-get install -y git python python-dev python-crypto
+  apt-get install -y git python python-crypto
   curl -O https://bootstrap.pypa.io/get-pip.py
   python get-pip.py
 
@@ -90,7 +90,7 @@ To create a new Kubernetes cluster, simply run the kube-up.sh script. A complete
 list of script options and some examples are listed below.
 
 ```
-CLC_CLUSTER_NAME=[name of kubernetes cluster]
+export CLC_CLUSTER_NAME=[name of kubernetes cluster]
 cd ./adm-kubernetes-on-clc
 bash kube-up.sh -c="$CLC_CLUSTER_NAME"
 ```
@@ -165,7 +165,7 @@ There are two ways to delete an existing cluster:
 1) Use our python script:
 
 ```
-python delete_cluster.py --cluster=clc_cluster_name --datacenter=DC1
+python delete_cluster.py --clc_cluster_name=clc_cluster_name --datacenter=DC1
 
 ```
 
