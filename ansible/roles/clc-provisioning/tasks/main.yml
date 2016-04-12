@@ -77,6 +77,22 @@
      clc_servers: "{{ clc_servers_additional }}"
   when: add_nodes is defined and add_nodes
 
+##########
+# Add public ip for ssh and kubernetes https port
+# This task is run only if the k8s_public_ip variable is set
+- name: Create public IP For SSH connection and api connections
+  clc_publicip:
+    protocol: 'TCP'
+    ports:
+        - 22
+        - 6443
+    server_ids:
+        - "{{ item.name }}"
+    state: present
+  register: clc
+  with_flattened:
+    - "{{ clc_servers.servers | lower }}"
+  when: k8s_public_ip is defined and k8s_public_ip
 
 ##########
 # ssh-copy-id the ssh keys to the servers which have just been created
