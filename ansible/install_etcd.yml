@@ -29,9 +29,14 @@
     - vars.yml
 
   pre_tasks:
+
     - name: include vars from master configuration
       include_vars: "{{ config_vars }}"
       when: config_vars is defined
+
+    - name: "Set etcd url for cluster in group {{ etcd_group }}"
+      set_fact:
+        etcd_endpoint: "{% for host in groups[etcd_group] %}http://{{ hostvars[host]['ansible_default_ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
 
   tasks:
 
