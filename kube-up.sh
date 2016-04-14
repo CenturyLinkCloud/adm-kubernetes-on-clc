@@ -175,7 +175,7 @@ server_config_id: default
 server_memory: 4
 server_cpu: 2
 skip_minion: True
-k8s_public_ip: True
+assign_public_ip: True
 async_time: 7200
 async_poll: 5
 CONFIG

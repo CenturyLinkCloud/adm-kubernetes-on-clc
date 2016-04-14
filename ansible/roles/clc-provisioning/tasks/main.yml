@@ -79,7 +79,7 @@
 
 ##########
 # Add public ip for ssh and kubernetes https port
-# This task is run only if the k8s_public_ip variable is set
+# This task is run only if the assign_public_ip variable is set
 - name: Create public IP For SSH connection and api connections
   clc_publicip:
     protocol: 'TCP'
@@ -92,7 +92,7 @@
   register: clc
   with_flattened:
     - "{{ clc_servers.servers | lower }}"
-  when: k8s_public_ip is defined and k8s_public_ip
+  when: assign_public_ip is defined and assign_public_ip
 
 ##########
 # ssh-copy-id the ssh keys to the servers which have just been created
