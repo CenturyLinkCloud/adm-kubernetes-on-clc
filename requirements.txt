@@ -1,5 +1,5 @@
 ansible>=2.0.1
-requests>=2.5
+requests>=2.9
 simplejson>=3.8.2
 clc-sdk>=2.44
-clc-ansible-module>=1.1.4
+clc-ansible-module==1.1.5
