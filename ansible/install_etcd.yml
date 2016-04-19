@@ -3,11 +3,10 @@
 - name: "Install etcd on group {{ etcd_group }}"
   hosts: "{{ etcd_group }}"
   gather_facts: True
-  vars:
-    - etcd_install_and_run_service: True
   vars_files:
     - vars.yml
-    - "{{ config_vars }}"
+  vars:
+    - etcd_install_and_run_service: True
 
   pre_tasks:
 
@@ -27,6 +26,8 @@
   hosts: localhost
   vars_files:
     - vars.yml
+  vars:
+    - etcd_install_and_run_service: True
 
   pre_tasks:
 
@@ -37,6 +38,12 @@
     - name: "Set etcd url for cluster in group {{ etcd_group }}"
       set_fact:
         etcd_endpoint: "{% for host in groups[etcd_group] %}http://{{ hostvars[host]['ansible_default_ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
+
+    - name:
+      set_fact:
+        clc_cluster_home: "{{ lookup('env','HOME') }}/.clc_kube/{{ clc_cluster_name }}"
+      when: clc_cluster_home is not defined
+
 
   tasks:
 

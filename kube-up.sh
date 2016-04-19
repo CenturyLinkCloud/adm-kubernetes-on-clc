@@ -287,6 +287,7 @@ ansible -i ${CLC_CLUSTER_HOME}/hosts -m shell -a uptime all
 echo "Part2 - Setting up etcd"
 #install etcd on master or on separate cluster of vms
 ansible-playbook -i ${CLC_CLUSTER_HOME}/hosts install_etcd.yml \
+    -e etcd_group=${etcd_group} \
     -e config_vars=${CLC_CLUSTER_HOME}/config/master_config.yml
 
 #### Part3
