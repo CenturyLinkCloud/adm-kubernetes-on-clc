@@ -1,7 +1,3 @@
----
----
-* TOC
-{: toc}
 
 These scripts handle the creation, deletion and expansion of kubernetes clusters on CenturyLink Cloud.
 
