@@ -32,7 +32,7 @@ If you run into any problems or want help with anything, we are here to help. Re
 
 The requirements to run this script are:
 - A linux administrative host (tested on ubuntu and OSX)
-- python 2 (tested on 2.7.11)
+- python 2 (tested on 2.7.11), including the -dev and -crypto packages
   - pip (installed with python as of 2.7.9)
 - git
 - A CenturyLink Cloud account with rights to create new hosts
@@ -76,7 +76,7 @@ guide to install the requirements and install the script.
 ```shell
   # system
   apt-get update
-  apt-get install -y git python python-crypto
+  apt-get install -y curl git python python-dev python-crypto
   curl -O https://bootstrap.pypa.io/get-pip.py
   python get-pip.py
 
@@ -182,7 +182,7 @@ python delete_cluster.py --clc_cluster_name=clc_cluster_name --datacenter=DC1
 
 2) Use the CenturyLink Cloud UI. To delete a cluster, log into the CenturyLink
 Cloud control portal and delete the parent server group that contains the
-Kubernetes Cluster. 
+Kubernetes Cluster.
 
 ## Examples
 
@@ -251,9 +251,9 @@ kubectl version
 kubectl cluster-info
 ```
 
-### Accessing the cluster programmatically 
+### Accessing the cluster programmatically
 
-It's possible to use the locally-stored client certificates to access the api server. For example, you may want to use any of the [Kubernetes API client libraries](https://github.com/kubernetes/kubernetes/blob/master/docs/devel/client-libraries.md) to program against your Kubernetes cluster in the programming language of your choice. 
+It's possible to use the locally-stored client certificates to access the api server. For example, you may want to use any of the [Kubernetes API client libraries](https://github.com/kubernetes/kubernetes/blob/master/docs/devel/client-libraries.md) to program against your Kubernetes cluster in the programming language of your choice.
 
 To demostrate how to use these locally stored certificates, we provide the folowing example of using ```curl``` to communicate to the master api server via https:
 
@@ -321,7 +321,7 @@ Then, you can access urls like ```http://127.0.0.1:8001/api/v1/proxy/namespaces/
 ## Load Balancer integration.
 
 Our Kubernetes code includes definitions of CenturyLinkCloud as a Kubernetes cloudprovider, which includes integration of the CLC Load Balancer services. When a Kubernetes service is defined as type: LoadBalancer, a public ip address is automatically obtained and mapped to the service endpoint.
- 
+
 ## What Kubernetes features do not work on CenturyLink Cloud
 
 These are the known items that don't work on CenturyLink cloud but do work on other cloud providers:
