@@ -14,7 +14,7 @@ For a detailed change history, please visit [the CenturyLink Cloud release notes
 
 ## Find Help
 
-If you run into any problems or want help with anything, we are here to help. Reach out to use via any of the following ways:
+If you run into any problems or want help with anything, we are here to help. Reach out to us via any of the following ways:
 
 - Submit a github issue
 - Find us in the Kubernetes Slack Community, channel #provider-centurylink
