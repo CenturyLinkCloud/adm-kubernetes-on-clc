@@ -121,25 +121,33 @@ locally on your administrative host, in the following directory
 ```shell
 Usage: kube-up.sh [OPTIONS]
 Create servers in the CenturyLinkCloud environment and initialize a Kubernetes cluster
-Environment variables CLC_V2_API_USERNAME and CLC_V2_API_PASSWD must be set in
-order to access the CenturyLinkCloud API
+Environment variables
+  CLC_CLUSTER_NAME (may be set with command-line option)
+  CLC_V2_API_USERNAME (required)
+  CLC_V2_API_PASSWD (required)
 
-All options (both short and long form) require arguments, and must include "="
-between option name and option value.
+
+Most options (both short and long form) require arguments, and must include "="
+between option name and option value. _--help_ and _--etcd_separate_cluster_ do
+not take arguments
 
      -h (--help)                   display this help and exit
      -c= (--clc_cluster_name=)     set the name of the cluster, as used in CLC group names
-     -t= (--minion_type=)          standard -> VM (default), bareMetal -> physical]
      -d= (--datacenter=)           VA1 (default)
      -m= (--minion_count=)         number of kubernetes minion nodes
      -mem= (--vm_memory=)          number of GB ram for each minion
      -cpu= (--vm_cpu=)             number of virtual cps for each minion node
-     -phyid= (--server_conf_id=)   physical server configuration id, one of
-                                      physical_server_20_core_conf_id
-                                      physical_server_12_core_conf_id
-                                      physical_server_4_core_conf_id (default)
-     -etcd_separate_cluster=yes    create a separate cluster of three etcd nodes,
+     -t= (--minion_type=)          "standard" [default, a VM] or "bareMetal" [a physical server]
+     -phyid= (--server_config_id=) if obtaining a bareMetal server, this configuration id
+                                   must be set to one of:
+                                      physical_server_20_core
+                                      physical_server_12_core
+                                      physical_server_4_core
+     --etcd_separate_cluster       create a separate cluster of three etcd nodes,
                                    otherwise run etcd on the master node
+     --network_id=                 vlan name to use for the created hosts. Uses
+                                   default if not set. If network does not exist
+                                   host creation will fail.
 ```
 
 ## Cluster Expansion
@@ -198,10 +206,10 @@ Create a cluster with name of k8s_2, an HA etcd cluster on 3 VMs and 6 worker mi
  bash kube-up.sh --clc_cluster_name=k8s_2 --minion_type=standard --minion_count=6 --datacenter=VA1 --etcd_separate_cluster=yes
 ```
 
-Create a cluster with name of k8s_3, 1 master node, and 10 worker minions (on VMs) with higher mem/cpu, in UC1:
+Create a cluster with name of k8s_3, 1 master node, and 10 worker minions (on VMs) with higher mem/cpu, in UC1 on a particular network
 
 ```shell
-bash kube-up.sh --clc_cluster_name=k8s_3 --minion_type=standard --minion_count=10 --datacenter=VA1 -mem=6 -cpu=4
+bash kube-up.sh --clc_cluster_name=k8s_3 --minion_type=standard --minion_count=10 --datacenter=UC1 --network_id=vlan_2200_10.141.200 -mem=6 -cpu=4
 ```
 
 

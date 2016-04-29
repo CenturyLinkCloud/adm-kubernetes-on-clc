@@ -46,6 +46,9 @@ not take arguments
                                       physical_server_4_core
      --etcd_separate_cluster       create a separate cluster of three etcd nodes,
                                    otherwise run etcd on the master node
+     --network_id=                 vlan name to use for the created hosts. Uses
+                                   default if not set. If network does not exist
+                                   host creation will fail.
 EOF
 }
 
@@ -59,6 +62,7 @@ function exit_message() {
 
 # default values before reading the command-line args
 datacenter=VA1
+vlan_id=False   # False => use default
 etcd_group=kube-master
 minion_count=2
 minion_type=standard
@@ -82,6 +86,10 @@ case $i in
     ;;
     -d=*|--datacenter=*)
     datacenter="${i#*=}"
+    shift # past argument=value
+    ;;
+    --network_id=*)
+    vlan_id="${i#*=}"
     shift # past argument=value
     ;;
     -m=*|--minion_count=*)
@@ -170,6 +178,7 @@ server_group: kube-master
 etcd_group: ${etcd_group}
 server_group_tag: master
 datacenter: ${datacenter}
+vlan_id: ${vlan_id}
 server_count: 1
 server_config_id: default
 server_memory: 4
@@ -188,6 +197,7 @@ server_group: ${etcd_group}
 etcd_group: ${etcd_group}
 server_group_tag: ${etcd_group}
 datacenter: ${datacenter}
+vlan_id: ${vlan_id}
 server_count: 3
 server_config_id: default
 server_memory: 2
@@ -203,6 +213,7 @@ clc_cluster_name: ${CLC_CLUSTER_NAME}
 server_group: kube-node
 server_group_tag: node
 datacenter: ${datacenter}
+vlan_id: ${vlan_id}
 server_count: ${minion_count}
 minion_type: ${minion_type}
 server_config_id: ${server_config_id}
