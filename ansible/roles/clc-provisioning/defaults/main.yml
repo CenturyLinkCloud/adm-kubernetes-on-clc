@@ -7,7 +7,7 @@
 
 clc_cluster_home: "{{ lookup('env','HOME') }}/.clc_kube/{{ clc_cluster_name }}"
 
-## The network name to use.  If set to False (here), the default network for the 
+## The network name to use.  If set to False (here), the default network for the
 ## user+datacenter is chosen.
 vlan_id: False
 
@@ -33,7 +33,7 @@ server_type: standard
 ## options are
 # standard (vm)
 # bareMetal
-server_storage: standard
+storage_type: standard
 
 ## mount addition filesystem storage
 ## must be left empty for physical servers

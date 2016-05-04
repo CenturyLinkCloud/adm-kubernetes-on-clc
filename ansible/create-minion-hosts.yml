@@ -13,11 +13,7 @@
   connection: local
 
   vars:
-    - server_group: minion
-    - datacenter: VA1
-    - server_count: 2
-    - server_memory: 4
-    - server_cpu: 2
+    - server_storage: 100
     - skip_minion: False
     - async_time: 7200
     - async_poll: 5
@@ -36,28 +32,13 @@
         server_type: "{{ minion_type }}"
       when: minion_type is defined
 
-    - name: Check for Minion_count
-      set_fact:
-        server_count: "{{ minion_count }}"
-      when: minion_count is defined
-
-    - name: Check for vm_cpu
-      set_fact:
-        server_cpu: "{{ vm_cpu }}"
-      when: vm_cpu is defined
-
-    - name: Check for vm_memory
-      set_fact:
-        server_memory: "{{ vm_memory }}"
-      when: vm_memory is defined
-
     - name: Allocate additional_disks /data space on virtual ("standard") minions
       set_fact:
         server_additional_disks:
           - path: /data
-            sizeGB: 100
+            sizeGB: "{{ server_storage }}"
             type: partitioned
-      when: server_type == "standard"
+      when: server_type == "standard" and server_storage > 0
 
     - name: Set Async time differently if type = bareMetal
       set_fact:

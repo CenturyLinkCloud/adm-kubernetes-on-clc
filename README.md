@@ -137,6 +137,7 @@ not take arguments
      -m= (--minion_count=)         number of kubernetes minion nodes
      -mem= (--vm_memory=)          number of GB ram for each minion
      -cpu= (--vm_cpu=)             number of virtual cps for each minion node
+     -storage= (--vm_storage=)     additional disk storage for each minion node (default 100GB)
      -t= (--minion_type=)          "standard" [default, a VM] or "bareMetal" [a physical server]
      -phyid= (--server_config_id=) if obtaining a bareMetal server, this configuration id
                                    must be set to one of:
@@ -200,16 +201,22 @@ Create a cluster with name of k8s_1, 1 master node and 3 worker minions (on phys
  bash kube-up.sh --clc_cluster_name=k8s_1 --minion_type=bareMetal --minion_count=3 --datacenter=VA1
 ```
 
-Create a cluster with name of k8s_2, an HA etcd cluster on 3 VMs and 6 worker minions (on VMs), in VA1
+Create a cluster with name of k8s_2, 1 master node and 1 worker minions with no additional disk storage, in VA1
 
 ```shell
- bash kube-up.sh --clc_cluster_name=k8s_2 --minion_type=standard --minion_count=6 --datacenter=VA1 --etcd_separate_cluster=yes
+ bash kube-up.sh --clc_cluster_name=k8s_2 --vm_storage=0 --minion_count=1 --datacenter=VA1
 ```
 
-Create a cluster with name of k8s_3, 1 master node, and 10 worker minions (on VMs) with higher mem/cpu, in UC1 on a particular network
+Create a cluster with name of k8s_3, an HA etcd cluster on 3 VMs and 6 worker minions (on VMs), in VA1
 
 ```shell
-bash kube-up.sh --clc_cluster_name=k8s_3 --minion_type=standard --minion_count=10 --datacenter=UC1 --network_id=vlan_2200_10.141.200 -mem=6 -cpu=4
+ bash kube-up.sh --clc_cluster_name=k8s_3 --minion_type=standard --minion_count=6 --datacenter=VA1 --etcd_separate_cluster=yes
+```
+
+Create a cluster with name of k8s_4, 1 master node, and 10 worker minions (on VMs) with higher mem/cpu, in UC1 on a particular network
+
+```shell
+bash kube-up.sh --clc_cluster_name=k8s_4 --minion_type=standard --minion_count=10 --datacenter=UC1 --network_id=vlan_2200_10.141.200 -mem=6 -cpu=4
 ```
 
 

@@ -38,6 +38,7 @@ not take arguments
      -m= (--minion_count=)         number of kubernetes minion nodes
      -mem= (--vm_memory=)          number of GB ram for each minion
      -cpu= (--vm_cpu=)             number of virtual cps for each minion node
+     -storage= (--vm_storage=)     additional disk storage for each minion node (default 100GB)
      -t= (--minion_type=)          "standard" [default, a VM] or "bareMetal" [a physical server]
      -phyid= (--server_config_id=) if obtaining a bareMetal server, this configuration id
                                    must be set to one of:
@@ -69,6 +70,7 @@ minion_type=standard
 server_config_id=default
 vm_memory=4
 vm_cpu=2
+vm_storage=100
 skip_minion=False
 async_time=7200
 async_poll=5
@@ -104,7 +106,10 @@ case $i in
     vm_cpu="${i#*=}"
     shift # past argument=value
     ;;
-
+    -storage=*|--vm_storage=*)
+    vm_storage="${i#*=}"
+    shift # past argument=value
+    ;;
     -t=*|--minion_type=*)
     minion_type="${i#*=}"
     shift # past argument=value
@@ -113,14 +118,12 @@ case $i in
     server_config_id="${i#*=}"
     shift # past argument=value
     ;;
-
     --etcd_separate_cluster*)
     # the ansible variable "etcd_group" has default value "master"
     etcd_separate_cluster=yes
     etcd_group=etcd
     shift # past argument with no value
     ;;
-
     *)
     echo "Unknown option: $1"
     echo
@@ -219,6 +222,7 @@ minion_type: ${minion_type}
 server_config_id: ${server_config_id}
 server_memory: ${vm_memory}
 server_cpu: ${vm_cpu}
+server_storage: ${vm_storage}
 skip_minion: False
 async_time: 7200
 async_poll: 5
