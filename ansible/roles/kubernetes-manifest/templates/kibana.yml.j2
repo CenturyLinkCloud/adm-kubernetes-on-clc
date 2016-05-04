@@ -22,7 +22,8 @@ spec:
             cpu: 100m
           requests:
             cpu: 100m
-        image: kibana:4.5
+        image: ntfrnzn/kibana-kubernetes-proxy:4.5
+        imagePullPolicy: Always
         env:
         - name: ELASTICSEARCH_URL
           value: "http://elasticsearch-logging:9200"
@@ -30,16 +31,6 @@ spec:
         - containerPort: 5601
           name: ui
           protocol: TCP
-        volumeMounts:
-        - name: kibana-conf
-          mountPath: "/opt/kibana/config"
-      volumes:
-      - name: kibana-conf
-        configMap:
-          name: "kibana-yml"
-          items:
-          - key: kibana.yml
-            path: kibana.yml
 ---
 apiVersion: v1
 kind: Service
