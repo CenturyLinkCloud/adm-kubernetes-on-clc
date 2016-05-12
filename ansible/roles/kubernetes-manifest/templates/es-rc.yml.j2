@@ -37,6 +37,8 @@ spec:
           value: "{{ es_is_master_node|string|lower }}"
         - name: NODE_DATA
           value: "{{ es_is_data_node|string|lower }}"
+        - name: HTTP_CORS_ENABLE
+          value: "false"
         - name: HTTP_ENABLE
           value: "{{ es_enable_http|string|lower }}"
         ports:
