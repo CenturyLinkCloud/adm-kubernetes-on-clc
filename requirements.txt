@@ -1,4 +1,4 @@
-ansible>=2.0.1
+ansible>=2.0.2
 requests>=2.9
 simplejson>=3.8.2
 clc-sdk>=2.44

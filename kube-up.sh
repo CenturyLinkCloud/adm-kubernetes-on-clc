@@ -157,7 +157,8 @@ else
   exit_message "Minion type \"${minion_type}\" unknown"
 fi
 
-
+PYTHON_SITE_PACKAGES=$(python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
+export ANSIBLE_LIBRARY=${PYTHON_SITE_PACKAGES}/clc_ansible_module/
 
 
 CLC_CLUSTER_HOME=~/.clc_kube/${CLC_CLUSTER_NAME}

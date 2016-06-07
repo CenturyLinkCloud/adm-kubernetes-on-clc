@@ -1,5 +1,5 @@
 ---
-- name: Create parent group
+- name: Create parent group and add network if necessary
   hosts: localhost
   gather_facts: False
   connection: local
@@ -15,3 +15,22 @@
         name: "{{ clc_cluster_name }}"
         location: "{{ datacenter }}"
         state: present
+
+    - name: Get facts on all networks
+      clc_network_fact:
+        location: "{{ datacenter }}"
+      register: fact
+
+    - debug: var=fact.networks
+      when: fact.networks
+
+    - name: Create network in {{ datacenter }} if not present
+      clc_network:
+        location: "{{ datacenter }}"
+        description: "kubernetes-{{ datacenter }}"
+        wait: True
+      when: not fact.networks
+      register: net
+
+    - debug: var=net
+      when: not fact.networks

@@ -81,7 +81,7 @@ then
 fi
 
 echo kubectl binary is located at $KUBECTL
-$KUBECTL version -c
+$KUBECTL version --client
 
 ### configuring kubectl
 set -e
