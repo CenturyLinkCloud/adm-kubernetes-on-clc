@@ -75,6 +75,16 @@
         async_poll: 10
       when: server_type == "bareMetal"
 
+    - name: Set anti-affinity policy if type = hyperscale
+      set_fact:
+        anti_affinity_name: "{{ anti_affinity_name }}"
+      when: server_type == "hyperscale"
+
+    - name: Set correct storage type if server type = hyperscale
+      set_fact:
+        storage_type: "hyperscale"
+      when: server_type == "hyperscale"
+
   roles:
     - { role: clc-provisioning, when: skip_minion == False }
 
