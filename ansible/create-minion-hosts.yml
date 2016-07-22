@@ -40,11 +40,29 @@
             type: partitioned
       when: server_type == "standard" and server_storage > 0
 
+    - name: Allocate additional_disks /data space on virtual ("hyperscale") minions
+      set_fact:
+        server_additional_disks:
+          - path: /data
+            sizeGB: "{{ server_storage }}"
+            type: partitioned
+      when: server_type == "hyperscale" and server_storage > 0
+
     - name: Set Async time differently if type = bareMetal
       set_fact:
         async_time: 14400
         async_poll: 10
       when: server_type == "bareMetal"
+
+    - name: Set anti-affinity policy if type = hyperscale
+      set_fact:
+        anti_affinity_name: "{{ anti_affinity_name }}"
+      when: server_type == "hyperscale"
+
+    - name: Set correct storage type if server type = hyperscale
+      set_fact:
+        storage_type: "hyperscale"
+      when: server_type == "hyperscale"
 
   roles:
     - { role: clc-provisioning, when: skip_minion == False }

@@ -39,12 +39,13 @@ not take arguments
      -mem= (--vm_memory=)          number of GB ram for each minion
      -cpu= (--vm_cpu=)             number of virtual cps for each minion node
      -storage= (--vm_storage=)     additional disk storage for each minion node (default 100GB)
-     -t= (--minion_type=)          "standard" [default, a VM] or "bareMetal" [a physical server]
+     -t= (--minion_type=)          "standard" [default, a VM], "hyperscale" [a VM] or "bareMetal" [a physical server]
      -phyid= (--server_config_id=) if obtaining a bareMetal server, this configuration id
                                    must be set to one of:
                                       physical_server_20_core
                                       physical_server_12_core
                                       physical_server_4_core
+     -a= (--anti_affinity_name=)   if using hyperscale server, an existing anti-affinity policy can be specified
      --etcd_separate_cluster       create a separate cluster of three etcd nodes,
                                    otherwise run etcd on the master node
      --network_id=                 vlan name to use for the created hosts. Uses
@@ -118,6 +119,10 @@ case $i in
     server_config_id="${i#*=}"
     shift # past argument=value
     ;;
+    -a=*|--anti_affinity_name=*)
+    anti_affinity_name="${i#*=}"
+    shift # past argument=value
+    ;;
     --etcd_separate_cluster*)
     # the ansible variable "etcd_group" has default value "master"
     etcd_separate_cluster=yes
@@ -144,7 +149,7 @@ if [ -z ${CLC_CLUSTER_NAME} ]
   exit_message 'Cluster name must be set with either command-line argument or as environment variable CLC_CLUSTER_NAME'
 fi
 
-if [[ ${minion_type} == "standard" ]]
+if [[ ${minion_type} == "standard" ]] || [[ ${minion_type} == "hyperscale" ]]
 then
   if [[ ${server_config_id} != "default" ]]
   then
@@ -157,7 +162,13 @@ else
   exit_message "Minion type \"${minion_type}\" unknown"
 fi
 
-
+if [[ ${anti_affinity_name} != "" ]]
+then
+  if [[ ${minion_type} != "hyperscale" ]]
+  then
+    exit_message "anti_affinity_name=\"${anti_affinity_name}\" is not compatible with minion_type=\"${minion_type}\""
+  fi
+fi
 
 
 CLC_CLUSTER_HOME=~/.clc_kube/${CLC_CLUSTER_NAME}
@@ -190,6 +201,7 @@ skip_minion: True
 assign_public_ip: False
 async_time: 7200
 async_poll: 5
+anti_affinity_name:
 CONFIG
 
 if [ "${etcd_group}" == "etcd" ]
@@ -226,6 +238,7 @@ server_storage: ${vm_storage}
 skip_minion: False
 async_time: 7200
 async_poll: 5
+anti_affinity_name: ${anti_affinity_name}
 CONFIG
 
 

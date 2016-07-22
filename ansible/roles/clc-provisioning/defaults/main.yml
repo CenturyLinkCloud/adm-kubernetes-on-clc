@@ -28,11 +28,13 @@ server_count: 1
 ## options are
 # standard (vm)
 # bareMetal
+# hyperscale
 server_type: standard
 
 ## options are
 # standard (vm)
 # bareMetal
+# hyperscale
 storage_type: standard
 
 ## mount addition filesystem storage
