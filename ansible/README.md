@@ -24,21 +24,22 @@ information.
 
 In part 2, the _kube-up.sh_ script calls a playbook to install etcd.
 
-`ansible-playbook -i hosts-${CLC_CLUSTER_NAME} install_etcd.yml \
-    -e config_vars=${CLC_CLUSTER_HOME}/config/master_config.yml`
-
+```
+ansible-playbook -i hosts-${CLC_CLUSTER_NAME} install_etcd.yml \
+    -e config_vars=${CLC_CLUSTER_HOME}/config/master_config.yml
+```
 
 #### Installing Kubernetes
 
 In part 3, the _kube-up.sh_ script calls two playbooks to install kubernetes, with
 differerent configurations for the master and minion nodes.
-
-`ansible-playbook  create-minion-hosts.yml \
+```
+ansible-playbook  create-minion-hosts.yml \
     -e config_vars=${CLC_CLUSTER_HOME}/config/minion_config.yml
 
 ansible-playbook  create-master-hosts.yml \
-    -e config_vars=${CLC_CLUSTER_HOME}/config/master_config.yml`
-
+    -e config_vars=${CLC_CLUSTER_HOME}/config/master_config.yml
+```
 
 #### Running Kubernetes applications
 
